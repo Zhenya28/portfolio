@@ -13,7 +13,7 @@ export function Hero() {
     <section id="top" className="section-pad relative flex min-h-svh flex-col justify-center overflow-hidden pb-12 pt-28">
       <div className="grid-bg" aria-hidden />
 
-      <div className="relative grid items-center gap-x-[clamp(32px,5vw,80px)] gap-y-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+      <div className="relative grid items-center gap-x-[clamp(32px,5vw,80px)] gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(420px,1.1fr)]">
         <div>
           <motion.p
             initial={reduced ? false : { opacity: 0, y: 12 }}
@@ -73,7 +73,7 @@ export function Hero() {
         </div>
 
         {/* looping terminal — web → mobile → automation scenes */}
-        <div className="relative">
+        <div className="relative w-full">
           <div
             aria-hidden
             className="absolute -inset-12 -z-10 bg-[radial-gradient(closest-side,rgba(159,239,0,0.13),rgba(141,123,255,0.09),transparent)] blur-2xl"

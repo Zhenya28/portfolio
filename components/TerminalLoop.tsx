@@ -127,7 +127,7 @@ export function TerminalLoop() {
       initial={reduced ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: EASE, delay: 0.35 }}
-      className="panel overflow-hidden"
+      className="panel w-full overflow-hidden"
     >
       <div className="panel__bar">
         <span className="panel__dot" />
@@ -143,7 +143,7 @@ export function TerminalLoop() {
       </div>
 
       <div
-        className="mono min-h-[232px] overflow-x-auto p-4 text-[0.75rem] leading-[1.9] transition-opacity duration-500 ease-out sm:p-5 sm:text-[0.8125rem]"
+        className="mono min-h-[260px] overflow-x-auto p-5 text-[0.8125rem] leading-[1.95] transition-opacity duration-500 ease-out sm:min-h-[292px] sm:p-6 sm:text-[0.9375rem]"
         style={{ opacity: fading ? 0 : 1 }}
         aria-label="Animacja terminala pokazująca, co dostajesz: aplikacje, automatyzację i prostą współpracę"
       >
