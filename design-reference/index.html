@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  ═══════════════════════════════════════════════════════════════════
+  DESIGN SYSTEM — Yevhen Kapush, personal site
+  ═══════════════════════════════════════════════════════════════════
+
+  PALETTE — "Ink on paper, one signal"
+    Paper   #F3F0E7  warm bone, not white — feels printed, not rendered
+    Ink     #16140F  warm near-black for type and fills
+    Cobalt  #2433C8  the single accent. Ultramarine reads as precise and
+                     European; together with the ochre selection color it
+                     quietly nods to Ukraine without waving a flag.
+    Ochre   #E8B72E  used ONLY for ::selection and tiny marks — a reward
+                     for people who interact, invisible to people who skim.
+    Why: every developer portfolio is dark-mode neon. A warm paper site
+    with editorial rules and ultramarine signals "designed object", and
+    prints beautifully as an actual business card.
+
+  TYPE PAIRING
+    Fraunces (display serif, optical sizing, real italics) — the voice.
+      Used huge, tight, with italic words cut into roman headlines.
+    Space Grotesk (geometric grotesque) — the machinery.
+      Body copy, labels, buttons; tracked-out uppercase for all metadata.
+    Why: the serif carries personality and craft; the grotesque carries
+    information. The contrast IS the brand: human voice / shipped product.
+
+  ANIMATION PHILOSOPHY — "the page breathes, it doesn't perform"
+    Everything is transform + opacity. Three moves only:
+      1. Load: hero lines rise out of overflow-hidden masks, staggered.
+      2. Scroll: sections fade + rise 24px once, via IntersectionObserver.
+      3. Pointer: project rows tilt ≤2.5°, the hero asterisk drifts with
+         the mouse. Nothing loops. prefers-reduced-motion kills all of it.
+
+  THE ONE LAYOUT IDEA — "the index sheet"
+    The whole site is structured like a printed technical index / ledger:
+    numbered sections (01–04) with hairline rules, marginal annotations,
+    and projects as full-width ledger rows instead of cards. Work comes
+    BEFORE about — proof first, biography second. The hero is entry 00.
+  ═══════════════════════════════════════════════════════════════════
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yevhen Kapush — Freelance Developer, Warsaw</title>
+<meta name="description" content="Yevhen Kapush — freelance developer in Warsaw. Web & mobile apps, automation. Builds things that actually ship.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style>
+  /* ───────────────────────── tokens & reset ───────────────────────── */
+  :root{
+    --paper:#F3F0E7;
+    --paper-deep:#EAE6D8;
+    --ink:#16140F;
+    --ink-soft:#5C5749;
+    --ink-faint:#8B8574;
+    --cobalt:#2433C8;
+    --ochre:#E8B72E;
+    --rule:rgba(22,20,15,.18);
+    --rule-strong:rgba(22,20,15,.55);
+    --serif:"Fraunces",Georgia,serif;
+    --grot:"Space Grotesk",-apple-system,sans-serif;
+    --pad:clamp(20px,5vw,72px);
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    *,*::before,*::after{animation:none!important;transition:none!important}
+  }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--grot);
+    font-size:1.0625rem;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--ochre);color:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  :focus-visible{outline:2px solid var(--cobalt);outline-offset:3px}
+
+  /* faint paper grain — static SVG turbulence, zero runtime cost */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:9;
+    opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .label{
+    font-family:var(--grot);font-weight:500;
+    font-size:.6875rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .label--ink{color:var(--ink)}
+  .label--cobalt{color:var(--cobalt)}
+
+  /* ───────────────────────── top bar ───────────────────────── */
+  .bar{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px var(--pad);
+    background:color-mix(in srgb,var(--paper) 88%,transparent);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--rule);
+  }
+  .bar__mark{font-family:var(--serif);font-weight:700;font-size:1.05rem;letter-spacing:-.01em}
+  .bar__mark i{font-style:italic;color:var(--cobalt)}
+  .bar__nav{display:flex;gap:clamp(14px,3vw,32px)}
+  .bar__nav a{position:relative;padding:2px 0;font-size:.6875rem;letter-spacing:.18em;text-transform:uppercase;font-weight:500}
+  .bar__nav a::after{
+    content:"";position:absolute;left:0;bottom:-2px;height:1px;width:100%;
+    background:var(--cobalt);transform:scaleX(0);transform-origin:left;
+    transition:transform .35s var(--ease);
+  }
+  .bar__nav a:hover::after{transform:scaleX(1)}
+
+  /* ───────────────────────── hero / 00 ───────────────────────── */
+  .hero{
+    min-height:100svh;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:96px var(--pad) 0;
+    position:relative;
+  }
+  .hero__meta{
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    padding-bottom:18px;border-bottom:1px solid var(--rule);
+  }
+  .hero__name{margin-top:clamp(28px,6vh,64px)}
+  .hero__name .line{display:block;overflow:hidden}
+  .hero__name .line span{
+    display:block;
+    transform:translateY(110%);
+    animation:rise 1s var(--ease) forwards;
+  }
+  .hero__name .line:nth-child(2) span{animation-delay:.12s}
+  h1{
+    font-family:var(--serif);
+    font-weight:560;
+    font-size:clamp(3.2rem,13.5vw,11rem);
+    line-height:.94;
+    letter-spacing:-.035em;
+    font-variation-settings:"opsz" 144;
+  }
+  h1 em{font-style:italic;font-weight:420;color:var(--cobalt)}
+  @keyframes rise{to{transform:translateY(0)}}
+
+  .hero__sub{
+    margin-top:clamp(22px,4vh,40px);
+    display:grid;grid-template-columns:minmax(0,56ch) 1fr;gap:24px;
+    align-items:end;
+    opacity:0;animation:fadein .9s var(--ease) .55s forwards;
+  }
+  @keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  .hero__sub p{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.55;color:var(--ink-soft);font-weight:400}
+  .hero__sub p strong{color:var(--ink);font-weight:600}
+  .hero__cta{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--grot);font-weight:500;font-size:.75rem;
+    letter-spacing:.16em;text-transform:uppercase;
+    padding:15px 26px;border:1px solid var(--ink);border-radius:999px;
+    transition:transform .3s var(--ease),opacity .3s var(--ease);
+    will-change:transform;cursor:pointer;background:none;color:var(--ink);
+  }
+  .btn:hover{transform:translateY(-2px)}
+  .btn:active{transform:translateY(0)}
+  .btn--fill{background:var(--ink);color:var(--paper)}
+  .btn--fill:hover{opacity:.88}
+  .btn svg{width:13px;height:13px}
+
+  /* drifting asterisk — the one mouse-reactive hero element */
+  .hero__ast{
+    position:absolute;right:clamp(16px,8vw,140px);top:16vh;
+    font-family:var(--serif);font-weight:300;
+    font-size:clamp(7rem,18vw,17rem);line-height:1;
+    color:var(--cobalt);opacity:0;
+    pointer-events:none;user-select:none;
+    animation:astin 1.2s var(--ease) .4s forwards;
+    will-change:transform;
+  }
+  @keyframes astin{to{opacity:.16}}
+
+  /* languages strip — bottom of hero */
+  .langs{
+    margin-top:clamp(36px,7vh,72px);
+    display:grid;grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--rule-strong);
+    opacity:0;animation:fadein .9s var(--ease) .8s forwards;
+  }
+  .langs__item{padding:16px 16px 22px 0;border-right:1px solid var(--rule)}
+  .langs__item:last-child{border-right:0}
+  .langs__name{font-family:var(--serif);font-style:italic;font-size:clamp(1rem,1.8vw,1.45rem);font-weight:480}
+  .langs__lvl{display:block;margin-top:4px}
+  .langs__bar{margin-top:10px;height:2px;background:var(--rule);position:relative;overflow:hidden}
+  .langs__bar i{
+    position:absolute;inset:0;background:var(--cobalt);
+    transform-origin:left;transform:scaleX(var(--lvl,1));
+  }
+
+  /* ───────────────────────── section chrome ───────────────────────── */
+  section{padding:clamp(72px,12vh,140px) var(--pad) 0}
+  .sec-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+    padding-bottom:16px;border-bottom:1px solid var(--rule-strong);
+  }
+  .sec-head__no{font-family:var(--serif);font-style:italic;font-size:1rem;color:var(--cobalt)}
+  .sec-head h2{
+    font-family:var(--serif);font-weight:560;letter-spacing:-.02em;
+    font-size:clamp(1.9rem,4.5vw,3.4rem);line-height:1;
+  }
+  .sec-head .label{text-align:right}
+
+  /* scroll reveal */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* ───────────────────────── work / 01 ───────────────────────── */
+  .work-row{
+    display:grid;
+    grid-template-columns:minmax(48px,8%) 1fr minmax(0,34%);
+    gap:clamp(16px,3vw,48px);
+    padding:clamp(28px,5vh,52px) 0;
+    border-bottom:1px solid var(--rule);
+    position:relative;
+    transform-style:preserve-3d;
+    will-change:transform;
+    transition:transform .4s var(--ease);
+  }
+  .work-row__no{font-family:var(--serif);font-style:italic;font-size:clamp(1.1rem,2vw,1.6rem);color:var(--ink-faint);padding-top:.35em}
+  .work-row h3{
+    font-family:var(--serif);font-weight:600;letter-spacing:-.02em;
+    font-size:clamp(1.7rem,3.6vw,2.9rem);line-height:1.05;
+  }
+  .work-row h3 a{display:inline-flex;align-items:baseline;gap:.35em}
+  .work-row h3 .arr{
+    font-family:var(--grot);font-size:.6em;color:var(--cobalt);
+    display:inline-block;transform:translate(-4px,-2px);opacity:0;
+    transition:transform .35s var(--ease),opacity .35s var(--ease);
+  }
+  .work-row:hover h3 .arr{opacity:1;transform:translate(0,-2px)}
+  .work-row__kind{margin-top:6px;display:block;color:var(--cobalt)}
+  .work-row__desc{margin-top:14px;max-width:52ch;color:var(--ink-soft)}
+  .work-row__meta{display:flex;flex-direction:column;justify-content:space-between;gap:18px;padding-top:.5em}
+  .stack{display:flex;flex-wrap:wrap;gap:6px}
+  .stack span{
+    font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500;
+    border:1px solid var(--rule);border-radius:999px;padding:5px 11px;color:var(--ink-soft);
+  }
+  .work-row__link{
+    align-self:flex-start;
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:.6875rem;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
+    border-bottom:1px solid var(--ink);padding-bottom:3px;
+  }
+  .work-row__link svg{width:13px;height:13px}
+  .work-row__link:hover{color:var(--cobalt);border-color:var(--cobalt)}
+
+  /* ───────────────────────── about / 02 ───────────────────────── */
+  .about{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,26%);gap:clamp(28px,5vw,80px);padding-top:clamp(36px,6vh,64px)}
+  .about__text{
+    font-family:var(--serif);font-weight:430;
+    font-size:clamp(1.35rem,2.6vw,2.1rem);
+    line-height:1.42;letter-spacing:-.01em;
+  }
+  .about__text em{font-style:italic;color:var(--cobalt)}
+  .about__text p+p{margin-top:1.1em}
+  .facts{border-left:1px solid var(--rule);padding-left:clamp(18px,2vw,28px);display:flex;flex-direction:column;gap:22px;align-self:start}
+  .fact .label{display:block;margin-bottom:3px}
+  .fact b{font-weight:600;font-size:1rem}
+
+  /* ───────────────────────── toolkit / 03 ───────────────────────── */
+  .kit{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--rule)}
+  .kit__col{padding:clamp(22px,4vh,40px) clamp(16px,2vw,32px) clamp(26px,4vh,44px) 0;border-right:1px solid var(--rule)}
+  .kit__col:last-child{border-right:0;padding-right:0}
+  .kit__col .label{display:block;margin-bottom:18px}
+  .kit__item{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    padding:7px 0;font-weight:500;font-size:.95rem;
+    border-bottom:1px dashed var(--rule);
+  }
+  .kit__item:last-child{border-bottom:0}
+  .dots{letter-spacing:2px;font-size:.65rem;color:var(--cobalt);white-space:nowrap}
+  .dots i{font-style:normal;color:var(--rule-strong)}
+  .kit-note{padding:14px 0 0;color:var(--ink-faint);font-size:.8125rem}
+
+  /* ───────────────────────── contact / 04 ───────────────────────── */
+  .contact{padding-bottom:clamp(72px,10vh,120px)}
+  .contact__grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(28px,6vw,96px);padding-top:clamp(36px,6vh,64px)}
+  .contact__pitch h3{
+    font-family:var(--serif);font-weight:560;letter-spacing:-.02em;
+    font-size:clamp(2rem,4.2vw,3.4rem);line-height:1.05;
+  }
+  .contact__pitch h3 em{font-style:italic;color:var(--cobalt);font-weight:430}
+  .contact__pitch p{margin-top:18px;color:var(--ink-soft);max-width:40ch}
+  .contact__direct{margin-top:28px;display:flex;flex-direction:column;gap:10px}
+  .contact__direct a{display:inline-flex;align-items:center;gap:10px;font-weight:500;width:fit-content}
+  .contact__direct a:hover{color:var(--cobalt)}
+  .contact__direct svg{width:17px;height:17px;flex:none}
+
+  .form{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--rule-strong)}
+  .field{border-bottom:1px solid var(--rule);padding:16px 0 14px;position:relative}
+  .field label{display:block;margin-bottom:6px}
+  .field input,.field textarea{
+    width:100%;border:0;background:transparent;font-family:var(--grot);
+    font-size:1.05rem;color:var(--ink);resize:vertical;
+  }
+  .field input:focus,.field textarea:focus{outline:none}
+  .field::after{
+    content:"";position:absolute;left:0;bottom:-1px;height:1px;width:100%;
+    background:var(--cobalt);transform:scaleX(0);transform-origin:left;
+    transition:transform .4s var(--ease);
+  }
+  .field:focus-within::after{transform:scaleX(1)}
+  .form .btn{margin-top:26px;align-self:flex-start}
+
+  .form-done{
+    display:none;flex-direction:column;gap:14px;justify-content:center;
+    border:1px solid var(--rule-strong);border-radius:4px;
+    padding:clamp(28px,5vh,48px) clamp(22px,3vw,40px);
+    opacity:0;transform:translateY(12px);
+  }
+  .form-done.show{display:flex;animation:fadein .6s var(--ease) forwards}
+  .form-done .tick{
+    width:44px;height:44px;border-radius:50%;background:var(--cobalt);
+    display:grid;place-items:center;color:var(--paper);
+  }
+  .form-done .tick svg{width:20px;height:20px}
+  .form-done h4{font-family:var(--serif);font-weight:600;font-size:1.5rem;letter-spacing:-.01em}
+  .form-done p{color:var(--ink-soft)}
+
+  /* ───────────────────────── footer ───────────────────────── */
+  footer{
+    margin:0 var(--pad);
+    border-top:1px solid var(--rule-strong);
+    padding:22px 0 30px;
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    color:var(--ink-faint);font-size:.8125rem;
+  }
+  footer i{font-family:var(--serif);font-style:italic}
+
+  /* ───────────────────────── responsive ───────────────────────── */
+  @media (max-width:880px){
+    .work-row{grid-template-columns:minmax(36px,10%) 1fr}
+    .work-row__meta{grid-column:2;padding-top:0}
+    .about{grid-template-columns:1fr}
+    .facts{border-left:0;border-top:1px solid var(--rule);padding:22px 0 0;flex-direction:row;flex-wrap:wrap;gap:18px 32px}
+    .kit{grid-template-columns:1fr}
+    .kit__col{border-right:0;border-bottom:1px solid var(--rule);padding-right:0}
+    .kit__col:last-child{border-bottom:0}
+    .contact__grid{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .bar__nav a:nth-child(2){display:none}
+    .hero__sub{grid-template-columns:1fr}
+    .hero__cta{justify-content:flex-start}
+    .langs{grid-template-columns:1fr 1fr}
+    .langs__item:nth-child(2){border-right:0}
+    .langs__item:nth-child(1),.langs__item:nth-child(2){border-bottom:1px solid var(--rule)}
+    .hero__ast{top:11vh;right:6px}
+    .sec-head .label{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ top bar ════════ -->
+<header class="bar">
+  <a class="bar__mark" href="#top">Yevhen <i>Kapush</i></a>
+  <nav class="bar__nav" aria-label="Main">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<!-- ════════ 00 · hero ════════ -->
+<main id="top">
+<section class="hero" style="padding-top:96px">
+  <div class="hero__ast" id="ast" aria-hidden="true">✳</div>
+
+  <div class="hero__meta">
+    <span class="label">№ 00 — Index</span>
+    <span class="label">Warsaw, Poland · 52.23° N, 21.01° E</span>
+    <span class="label label--cobalt">Freelance · Web · Mobile · Automation</span>
+  </div>
+
+  <div class="hero__name">
+    <h1 class="line"><span>Yevhen Kapush</span></h1>
+    <h1 class="line"><span>builds things that <em>ship.</em></span></h1>
+  </div>
+
+  <div class="hero__sub">
+    <p><strong>Developer for hire.</strong> Web apps, mobile apps and automation bots —
+       in production, not in a drawer. Four languages, two countries,
+       one rule: if it's worth building, it gets finished.</p>
+    <div class="hero__cta">
+      <a class="btn btn--fill" href="#work">Selected work
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16m0 0l-6-6m6 6l6-6"/></svg>
+      </a>
+      <a class="btn" href="#contact">Start a project</a>
+    </div>
+  </div>
+
+  <div class="langs" aria-label="Spoken languages">
+    <div class="langs__item"><span class="langs__name">Українська</span><span class="langs__lvl label">Native</span><span class="langs__bar"><i style="--lvl:1"></i></span></div>
+    <div class="langs__item"><span class="langs__name">Русский</span><span class="langs__lvl label">Native</span><span class="langs__bar"><i style="--lvl:1"></i></span></div>
+    <div class="langs__item"><span class="langs__name">Polski</span><span class="langs__lvl label">C1</span><span class="langs__bar"><i style="--lvl:.84"></i></span></div>
+    <div class="langs__item"><span class="langs__name">English</span><span class="langs__lvl label">B2 / C1</span><span class="langs__bar"><i style="--lvl:.74"></i></span></div>
+  </div>
+</section>
+
+<!-- ════════ 01 · work ════════ -->
+<section id="work">
+  <div class="sec-head reveal">
+    <div><span class="sec-head__no">№ 01</span>&ensp;<h2 style="display:inline">Selected work</h2></div>
+    <span class="label">Case studies, not screenshots</span>
+  </div>
+
+  <article class="work-row reveal tilt">
+    <div class="work-row__no">01</div>
+    <div>
+      <h3><a href="https://github.com/Zhenya28" target="_blank" rel="noopener">Flashly<span class="arr">↗</span></a></h3>
+      <span class="work-row__kind label">Spaced-repetition mobile app · Engineering thesis</span>
+      <p class="work-row__desc">A flashcard app built around the SM-2 spaced-repetition
+         algorithm — the same maths behind Anki, rebuilt natively for mobile.
+         Collections, progress tracking and per-session statistics, with sync
+         handled by Supabase.</p>
+    </div>
+    <div class="work-row__meta">
+      <div class="stack"><span>React Native</span><span>Expo</span><span>TypeScript</span><span>Supabase</span></div>
+      <a class="work-row__link" href="https://github.com/Zhenya28" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.26 5.66.41.36.78 1.05.78 2.13v3.16c0 .31.21.67.8.55A11.51 11.51 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub</a>
+    </div>
+  </article>
+
+  <article class="work-row reveal tilt">
+    <div class="work-row__no">02</div>
+    <div>
+      <h3><a href="https://github.com/Zhenya28" target="_blank" rel="noopener">MyFinance<span class="arr">↗</span></a></h3>
+      <span class="work-row__kind label">Personal finance PWA · AI-assisted</span>
+      <p class="work-row__desc">A finance dashboard that imports mBank CSV exports,
+         categorises transactions with the Gemini API, and tracks ETFs and FX
+         through Yahoo Finance — all rendered as interactive charts. Built
+         because spreadsheets weren't cutting it.</p>
+    </div>
+    <div class="work-row__meta">
+      <div class="stack"><span>Next.js</span><span>TypeScript</span><span>Prisma</span><span>PostgreSQL</span><span>Recharts</span><span>Gemini API</span></div>
+      <a class="work-row__link" href="https://github.com/Zhenya28" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.26 5.66.41.36.78 1.05.78 2.13v3.16c0 .31.21.67.8.55A11.51 11.51 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub</a>
+    </div>
+  </article>
+
+  <article class="work-row reveal tilt">
+    <div class="work-row__no">03</div>
+    <div>
+      <h3><a href="https://github.com/Zhenya28/pyszne-slots-monitor" target="_blank" rel="noopener">Pyszne.pl Slot Monitor<span class="arr">↗</span></a></h3>
+      <span class="work-row__kind label">Telegram automation bot · Runs in production</span>
+      <p class="work-row__desc">A bot that watches food-delivery shift availability in
+         real time, pings Telegram the moment a slot opens, and auto-accepts the
+         preferred ones. Runs unattended on a five-minute cron via GitHub
+         Actions — zero servers, zero cost.</p>
+    </div>
+    <div class="work-row__meta">
+      <div class="stack"><span>Python</span><span>Playwright</span><span>GitHub Actions</span><span>Telegram Bot API</span></div>
+      <a class="work-row__link" href="https://github.com/Zhenya28/pyszne-slots-monitor" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.26 5.66.41.36.78 1.05.78 2.13v3.16c0 .31.21.67.8.55A11.51 11.51 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+        GitHub</a>
+    </div>
+  </article>
+</section>
+
+<!-- ════════ 02 · about ════════ -->
+<section id="about">
+  <div class="sec-head reveal">
+    <div><span class="sec-head__no">№ 02</span>&ensp;<h2 style="display:inline">About</h2></div>
+    <span class="label">The short version</span>
+  </div>
+
+  <div class="about">
+    <div class="about__text reveal">
+      <p>I'm a developer who <em>actually finishes things.</em> Based in Warsaw,
+         originally from Ukraine — I've shipped mobile apps, finance dashboards
+         and automation bots that run in production every day.</p>
+      <p>Currently finishing my CS degree, and taking on freelance projects
+         that are <em>worth building.</em></p>
+    </div>
+    <aside class="facts reveal">
+      <div class="fact"><span class="label">Base</span><b>Warsaw, PL</b></div>
+      <div class="fact"><span class="label">Origin</span><b>Ukraine</b></div>
+      <div class="fact"><span class="label">CS degree</span><b>2026</b></div>
+      <div class="fact"><span class="label">Languages</span><b>4 spoken</b></div>
+      <div class="fact"><span class="label">Mode</span><b>Freelance</b></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ════════ 03 · toolkit ════════ -->
+<section id="toolkit">
+  <div class="sec-head reveal">
+    <div><span class="sec-head__no">№ 03</span>&ensp;<h2 style="display:inline">Toolkit</h2></div>
+    <span class="label">Depth, not a word cloud</span>
+  </div>
+
+  <div class="kit reveal">
+    <div class="kit__col">
+      <span class="label label--cobalt">Frontend</span>
+      <div class="kit__item">React<span class="dots">●●●●</span></div>
+      <div class="kit__item">TypeScript<span class="dots">●●●●</span></div>
+      <div class="kit__item">React Native<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Next.js<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Tailwind CSS<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Vite<span class="dots">●●●<i>●</i></span></div>
+    </div>
+    <div class="kit__col">
+      <span class="label label--cobalt">Backend &amp; Data</span>
+      <div class="kit__item">Node.js<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Python<span class="dots">●●●●</span></div>
+      <div class="kit__item">PostgreSQL<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Supabase<span class="dots">●●●<i>●</i></span></div>
+      <div class="kit__item">Prisma<span class="dots">●●●<i>●</i></span></div>
+    </div>
+    <div class="kit__col">
+      <span class="label label--cobalt">Automation &amp; Ops</span>
+      <div class="kit__item">Playwright<span class="dots">●●●●</span></div>
+      <div class="kit__item">GitHub Actions<span class="dots">●●●●</span></div>
+      <div class="kit__item">Telegram Bot API<span class="dots">●●●●</span></div>
+      <div class="kit__item">Git<span class="dots">●●●●</span></div>
+      <div class="kit__item">Expo<span class="dots">●●●<i>●</i></span></div>
+    </div>
+  </div>
+  <p class="kit-note reveal">● = used in shipped, production work &nbsp;·&nbsp; human languages are indexed in № 00</p>
+</section>
+
+<!-- ════════ 04 · contact ════════ -->
+<section id="contact" class="contact">
+  <div class="sec-head reveal">
+    <div><span class="sec-head__no">№ 04</span>&ensp;<h2 style="display:inline">Contact</h2></div>
+    <span class="label">Replies within 24 h</span>
+  </div>
+
+  <div class="contact__grid">
+    <div class="contact__pitch reveal">
+      <h3>Have something <em>worth building?</em></h3>
+      <p>Tell me what it is and where it hurts. If it's a fit, you'll get a
+         plan and a price — not a sales call.</p>
+      <div class="contact__direct">
+        <a href="mailto:jeka.kapush@gmail.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>
+          jeka.kapush@gmail.com</a>
+        <a href="https://github.com/Zhenya28" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 015.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.26 5.66.41.36.78 1.05.78 2.13v3.16c0 .31.21.67.8.55A11.51 11.51 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
+          github.com/Zhenya28</a>
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/></svg>
+          LinkedIn</a>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <form class="form" id="contactForm" novalidate>
+        <div class="field">
+          <label class="label" for="f-name">Name</label>
+          <input id="f-name" name="name" type="text" autocomplete="name" required placeholder="Jan Kowalski">
+        </div>
+        <div class="field">
+          <label class="label" for="f-email">Email</label>
+          <input id="f-email" name="email" type="email" autocomplete="email" required placeholder="jan@company.pl">
+        </div>
+        <div class="field">
+          <label class="label" for="f-msg">What are we building?</label>
+          <textarea id="f-msg" name="message" rows="4" required placeholder="An app, a dashboard, a bot…"></textarea>
+        </div>
+        <button class="btn btn--fill" type="submit">Send it
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12h16m0 0l-6-6m6 6l-6 6"/></svg>
+        </button>
+      </form>
+      <div class="form-done" id="formDone" role="status" aria-live="polite">
+        <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg></div>
+        <h4>Got it.</h4>
+        <p>I reply within 24 hours — usually faster. Talk soon.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ════════ footer ════════ -->
+<footer>
+  <span>© 2026 Yevhen Kapush</span>
+  <span><i>Designed and built by hand in Warsaw — no template was harmed.</i></span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = matchMedia("(pointer: fine)").matches;
+
+  /* scroll reveal — fade + 24px rise, once */
+  const io = new IntersectionObserver(entries => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(el => {
+    if (reduced) el.classList.add("in"); else io.observe(el);
+  });
+
+  /* hero asterisk drifts with the mouse — transform only, rAF-throttled */
+  const ast = document.getElementById("ast");
+  if (ast && finePointer && !reduced) {
+    let tx = 0, ty = 0, x = 0, y = 0, raf = null;
+    addEventListener("mousemove", ev => {
+      tx = (ev.clientX / innerWidth  - .5) * 40;
+      ty = (ev.clientY / innerHeight - .5) * 40;
+      if (!raf) raf = requestAnimationFrame(step);
+    }, { passive: true });
+    function step(){
+      x += (tx - x) * .08; y += (ty - y) * .08;
+      ast.style.transform = `translate3d(${x}px,${y}px,0) rotate(${x * .35}deg)`;
+      raf = (Math.abs(tx - x) + Math.abs(ty - y) > .1) ? requestAnimationFrame(step) : null;
+    }
+  }
+
+  /* project rows: subtle cursor-aware tilt, max ~2.5deg */
+  if (finePointer && !reduced) {
+    document.querySelectorAll(".tilt").forEach(row => {
+      let raf = null, rx = 0, ry = 0;
+      row.addEventListener("pointermove", ev => {
+        const r = row.getBoundingClientRect();
+        ry = ((ev.clientX - r.left) / r.width  - .5) *  2.5;
+        rx = ((ev.clientY - r.top)  / r.height - .5) * -2.5;
+        if (!raf) raf = requestAnimationFrame(() => {
+          row.style.transform = `perspective(1200px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+          raf = null;
+        });
+      });
+      row.addEventListener("pointerleave", () => {
+        row.style.transform = "perspective(1200px) rotateX(0deg) rotateY(0deg)";
+      });
+    });
+  }
+
+  /* contact form — frontend-only success state */
+  const form = document.getElementById("contactForm");
+  const done = document.getElementById("formDone");
+  form.addEventListener("submit", ev => {
+    ev.preventDefault();
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    form.style.display = "none";
+    done.classList.add("show");
+  });
+})();
+</script>
+</body>
+</html>

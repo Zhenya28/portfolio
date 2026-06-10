@@ -1,0 +1,271 @@
+@import "tailwindcss";
+
+/*
+  ═══════════════════════════════════════════════════════════════════
+  DESIGN SYSTEM v3 — "mission control"
+  A dark engineering console for a developer who automates things.
+
+  PALETTE
+    Graphite  #0A0D10  near-black with a cold blue cast — IDE, not void
+    Panel     #10151B  raised surfaces, terminal windows
+    Signal    #9FEF00  terminal green — uptime, success, the brand accent
+    Amber     #FFB224  secondary highlight, used like a warning light
+    Text      #E8EDF2 / muted #97A1AC / faint #5C6670
+
+  TYPE
+    Inter Tight — headlines & body. Sharp, dense, professional.
+    JetBrains Mono — labels, paths, logs, metadata. The machinery.
+
+  MOTIFS
+    Blueprint grid background · terminal panels with titlebars ·
+    sections as code comments (// 01 — selected_work) · log lines
+    that appear like real output · status readouts in mono.
+
+  MOTION
+    transform + opacity only. Log lines stagger in once, reveals fire
+    once on scroll, hover states are instant and purposeful. No loops.
+  ═══════════════════════════════════════════════════════════════════
+*/
+
+@theme {
+  --color-bg: #0a0d10;
+  --color-panel: #10151b;
+  --color-panel-2: #161d25;
+  --color-text: #e8edf2;
+  --color-muted: #97a1ac;
+  --color-faint: #5c6670;
+  --color-signal: #9fef00;
+  --color-violet: #8d7bff;
+  --color-amber: #ffb224;
+  --font-sans: var(--font-inter), -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", monospace;
+}
+
+:root {
+  --line: rgba(232, 237, 242, 0.07);
+  --line-strong: rgba(232, 237, 242, 0.14);
+  --pad: clamp(20px, 5vw, 72px);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+}
+
+/* blueprint grid, fading out towards the bottom of the hero */
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+.label--signal {
+  color: var(--color-signal);
+}
+
+/* terminal / console panel */
+.panel {
+  background: var(--color-panel);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+}
+.panel__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-faint);
+}
+.panel__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 14px 24px;
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--color-text);
+  background: none;
+  cursor: pointer;
+  transition:
+    transform 0.25s var(--ease),
+    border-color 0.25s var(--ease),
+    opacity 0.25s var(--ease);
+  will-change: transform;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-signal);
+}
+.btn:active {
+  transform: translateY(0);
+}
+.btn--signal {
+  background: var(--color-signal);
+  border-color: var(--color-signal);
+  color: var(--color-bg);
+  font-weight: 700;
+}
+.btn--signal:hover {
+  opacity: 0.9;
+}
+.btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.hairline {
+  border-color: var(--line);
+}
+.hairline-strong {
+  border-color: var(--line-strong);
+}
+
+.section-pad {
+  padding-left: var(--pad);
+  padding-right: var(--pad);
+}
+
+.nav-link {
+  position: relative;
+  padding: 2px 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  transition: color 0.25s var(--ease);
+}
+.nav-link:hover {
+  color: var(--color-signal);
+}
+
+/* stack token, e.g. [react-native] */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px 9px;
+  background: var(--color-panel-2);
+}
+
+/* terminal loop — caret + live dot (the one intentional infinite loop) */
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* form fields */
+.field {
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0 14px;
+  position: relative;
+}
+.field input,
+.field textarea {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--color-text);
+  resize: vertical;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--color-faint);
+}
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+}
+.field::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-signal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease);
+}
+.field:focus-within::after {
+  transform: scaleX(1);
+}
