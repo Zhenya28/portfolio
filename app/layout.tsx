@@ -18,23 +18,25 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: "Yevhen Kapush — Freelance Developer, Warszawa",
+    default: "Pomysł jest twój. Dowiezienie — moje. | Yevhen Kapush, freelance developer",
     template: "%s — Yevhen Kapush",
   },
   description:
-    "Freelance developer w Warszawie. Aplikacje webowe i mobilne, automatyzacje — działające na produkcji, nie w szufladzie. Cztery języki, dwa kraje, jedna zasada: dokończyć.",
+    "Aplikacje webowe, mobilne i automatyzacje — od pierwszej rozmowy do wdrożenia na produkcję. Stała cena, działające demo co tydzień, kod w 100% twój. Freelance developer, Warszawa.",
   openGraph: {
-    title: "Yevhen Kapush — tworzy i automatyzuje software, który działa",
-    description: "Freelance developer w Warszawie. Aplikacje webowe i mobilne, automatyzacje.",
+    title: "Pomysł jest twój. Dowiezienie — moje.",
+    description:
+      "Aplikacje webowe, mobilne i automatyzacje — od rozmowy do produkcji. Stała cena, demo co tydzień, kod w 100% twój.",
     url: SITE.url,
-    siteName: "Yevhen Kapush",
+    siteName: "Yevhen Kapush — freelance developer",
     locale: "pl_PL",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Yevhen Kapush — tworzy i automatyzuje software, który działa",
-    description: "Freelance developer w Warszawie. Aplikacje webowe i mobilne, automatyzacje.",
+    title: "Pomysł jest twój. Dowiezienie — moje.",
+    description:
+      "Aplikacje webowe, mobilne i automatyzacje — od rozmowy do produkcji. Stała cena, demo co tydzień, kod w 100% twój.",
   },
   robots: { index: true, follow: true },
 };

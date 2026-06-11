@@ -24,15 +24,24 @@ export default function OpenGraphImage() {
         }}
       >
         <div style={{ display: "flex", fontSize: 26, color: "#97a1ac" }}>
-          <span style={{ color: "#9fef00" }}>yevhen</span>@warsaw:~$ whoami
+          <span style={{ color: "#9fef00" }}>$</span>
+          <span style={{ marginLeft: 12 }}>./pomysl --na &quot;aplikację, dashboard, bota&quot;</span>
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ display: "flex", fontSize: 84, fontWeight: 800, letterSpacing: "-0.03em" }}>
-            Yevhen Kapush
+          <div style={{ display: "flex", fontSize: 76, fontWeight: 800, letterSpacing: "-0.03em" }}>
+            Pomysł jest twój.
           </div>
-          <div style={{ display: "flex", fontSize: 42, color: "#97a1ac", marginTop: 8 }}>
-            tworzy i automatyzuje
-            <span style={{ color: "#9fef00", marginLeft: 12 }}>software, który działa.</span>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 76,
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
+              color: "#97a1ac",
+              marginTop: 4,
+            }}
+          >
+            Dowiezienie —<span style={{ color: "#9fef00", marginLeft: 18 }}>moje.</span>
           </div>
         </div>
         <div
@@ -44,7 +53,7 @@ export default function OpenGraphImage() {
           }}
         >
           <span>web · mobile · automatyzacja</span>
-          <span>uk-UA / ru-RU / pl-PL / en-GB</span>
+          <span>Yevhen Kapush · Warszawa</span>
         </div>
       </div>
     ),

@@ -50,7 +50,7 @@ function LanguageGauge({ value, baseDelay }: { value: number; baseDelay: number 
 export function Toolkit() {
   return (
     <section id="toolkit" className="section-pad pt-[clamp(72px,12vh,140px)]">
-      <SectionHead no="03" slug="narzedzia" title="Narzędzia" note="głębia, nie chmura tagów" />
+      <SectionHead no="04" slug="warsztat" title="Warsztat" note="czym dowożę — głębia, nie chmura tagów" />
 
       {/* inverted block — the loudest surface on the page, on purpose */}
       <Reveal>

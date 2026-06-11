@@ -13,17 +13,18 @@ import { SectionHead } from "./Reveal";
 type Token = { w: string; tone?: "signal" | "violet" };
 
 const SENTENCE: Token[] = [
-  { w: "Jestem" }, { w: "developerem," }, { w: "który" },
+  { w: "Nie" }, { w: "jestem" }, { w: "agencją." },
+  { w: "Jestem" }, { w: "człowiekiem," }, { w: "który" },
   { w: "naprawdę", tone: "signal" }, { w: "kończy", tone: "signal" }, { w: "projekty.", tone: "signal" },
-  { w: "Mieszkam" }, { w: "w" }, { w: "Warszawie," }, { w: "pochodzę" }, { w: "z" }, { w: "Ukrainy." },
-  { w: "Buduję" }, { w: "aplikacje" }, { w: "mobilne," }, { w: "dashboardy" }, { w: "finansowe" },
-  { w: "i" }, { w: "boty," }, { w: "które" }, { w: "codziennie", tone: "violet" },
-  { w: "działają", tone: "violet" }, { w: "na", tone: "violet" }, { w: "produkcji.", tone: "violet" },
-  { w: "Kończę" }, { w: "studia" }, { w: "CS" }, { w: "i" }, { w: "biorę" }, { w: "zlecenia," },
-  { w: "które" }, { w: "są" }, { w: "warte" }, { w: "zbudowania." },
+  { w: "Prowadzę" }, { w: "je" }, { w: "od", tone: "violet" }, { w: "pomysłu", tone: "violet" },
+  { w: "do", tone: "violet" }, { w: "produkcji,", tone: "violet" }, { w: "a" }, { w: "mój" },
+  { w: "kod" }, { w: "codziennie" }, { w: "robi" }, { w: "swoją" }, { w: "robotę" },
+  { w: "dla" }, { w: "prawdziwych" }, { w: "użytkowników." },
+  { w: "Ty" }, { w: "wiesz," }, { w: "co" }, { w: "boli." },
+  { w: "Ja" }, { w: "sprawiam,", tone: "signal" }, { w: "że", tone: "signal" }, { w: "przestaje.", tone: "signal" },
 ];
 
-const FACTS = ["Warszawa, PL", "z Ukrainy", "CS 2026", "4 języki", "freelance"];
+const FACTS = ["Warszawa, PL", "4 języki", "odpowiedź < 24 h", "stała wycena", "— Yevhen Kapush"];
 
 const toneClass = { signal: "text-signal", violet: "text-violet" } as const;
 
@@ -85,7 +86,7 @@ export function About() {
   if (reduced) {
     return (
       <section id="about" className="section-pad pt-[clamp(72px,12vh,140px)]">
-        <SectionHead no="02" slug="o_mnie" title="O mnie" note="krótka wersja" />
+        <SectionHead no="03" slug="o_mnie" title="O mnie" note="krótka wersja" />
         <p className="mt-10 max-w-5xl text-[clamp(1.5rem,3.4vw,2.8rem)] font-semibold leading-[1.35] tracking-tight">
           {SENTENCE.map((t, i) => (
             <span key={i} className={t.tone ? toneClass[t.tone] : undefined}>
@@ -109,7 +110,7 @@ export function About() {
       {/* tall track = the read happens while the viewport stays pinned */}
       <div ref={ref} className="h-[280vh]">
         <div className="section-pad sticky top-0 flex h-svh flex-col justify-center">
-          <SectionHead no="02" slug="o_mnie" title="O mnie" note="scrolluj — tekst czyta się sam" />
+          <SectionHead no="03" slug="o_mnie" title="O mnie" note="scrolluj — tekst czyta się sam" />
           <p className="mt-[clamp(28px,6vh,56px)] max-w-5xl text-[clamp(1.5rem,3.4vw,2.8rem)] font-semibold leading-[1.35] tracking-tight">
             {SENTENCE.map((t, i) => (
               <Word key={i} token={t} index={i} total={SENTENCE.length} progress={scrollYProgress} />

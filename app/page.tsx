@@ -1,5 +1,6 @@
 import { TopBar } from "@/components/TopBar";
 import { Hero } from "@/components/Hero";
+import { Process } from "@/components/Process";
 import { Work } from "@/components/Work";
 import { About } from "@/components/About";
 import { Toolkit } from "@/components/Toolkit";
@@ -12,6 +13,7 @@ export default function Home() {
       <TopBar />
       <main>
         <Hero />
+        <Process />
         <Work />
         <About />
         <Toolkit />

@@ -18,8 +18,8 @@ export function TopBar() {
         <span className="text-signal">yevhen</span>@warsaw<span className="text-faint">:~$</span>
       </a>
       <nav className="flex items-center gap-[clamp(14px,3vw,32px)]" aria-label="Główna nawigacja">
+        <a className="nav-link hidden sm:block" href="#process">./współpraca</a>
         <a className="nav-link" href="#work">./projekty</a>
-        <a className="nav-link hidden sm:block" href="#about">./o-mnie</a>
         <a className="nav-link" href="#contact">./kontakt</a>
       </nav>
     </header>

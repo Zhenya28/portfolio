@@ -34,7 +34,7 @@ export function Contact() {
 
   return (
     <section id="contact" className="section-pad pb-[clamp(72px,10vh,120px)] pt-[clamp(72px,12vh,140px)]">
-      <SectionHead no="04" slug="kontakt" title="Kontakt" note="odpowiedź w 24h" />
+      <SectionHead no="05" slug="kontakt" title="Kontakt" note="odpowiedź w 24h" />
       <div className="grid gap-[clamp(28px,6vw,96px)] pt-[clamp(32px,6vh,56px)] lg:grid-cols-2">
         <Reveal>
           <h3 className="text-[clamp(1.8rem,3.6vw,2.8rem)] font-bold leading-[1.08] tracking-tight">
@@ -44,9 +44,15 @@ export function Contact() {
             </span>
           </h3>
           <p className="mt-4 max-w-[44ch] text-muted">
-            Napisz, co to jest i co boli. Jeśli to dobry fit, dostaniesz plan i cenę — nie telefon
-            od handlowca.
+            Opisz problem w trzech zdaniach. W 24 godziny dostaniesz odpowiedź — a jeśli to dobry
+            fit, konkretny plan i stałą cenę. Bez spotkań &bdquo;na poznanie się&rdquo;.
           </p>
+          <div className="mono mt-5 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.75rem] text-faint">
+            <span><span className="text-signal">✓</span> wycena w 48 h</span>
+            <span><span className="text-signal">✓</span> stała cena</span>
+            <span><span className="text-signal">✓</span> NDA — nie ma problemu</span>
+            <span><span className="text-signal">✓</span> faktura lub umowa</span>
+          </div>
           <div className="mono mt-8 flex flex-col gap-3 text-[0.875rem]">
             <a href={`mailto:${SITE.email}`} className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
               <MailIcon className="size-4 flex-none" /> {SITE.email}
