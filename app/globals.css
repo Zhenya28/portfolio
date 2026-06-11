@@ -229,6 +229,12 @@ body {
     opacity: 0.3;
   }
 }
+/* slow current flowing through dashed connector lines */
+@keyframes dashflow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
 
 /* form fields */
 .field {

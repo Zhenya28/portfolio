@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
-import { SITE } from "@/lib/data";
+import { SITE_URL } from "@/lib/i18n";
 import "./globals.css";
 
 const inter = Inter_Tight({
@@ -16,28 +16,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: {
-    default: "Pomysł jest twój. Dowiezienie — moje. | Yevhen Kapush, freelance developer",
-    template: "%s — Yevhen Kapush",
-  },
-  description:
-    "Aplikacje webowe, mobilne i automatyzacje — od pierwszej rozmowy do wdrożenia na produkcję. Stała cena, działające demo co tydzień, kod w 100% twój. Freelance developer, Warszawa.",
-  openGraph: {
-    title: "Pomysł jest twój. Dowiezienie — moje.",
-    description:
-      "Aplikacje webowe, mobilne i automatyzacje — od rozmowy do produkcji. Stała cena, demo co tydzień, kod w 100% twój.",
-    url: SITE.url,
-    siteName: "Yevhen Kapush — freelance developer",
-    locale: "pl_PL",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Pomysł jest twój. Dowiezienie — moje.",
-    description:
-      "Aplikacje webowe, mobilne i automatyzacje — od rozmowy do produkcji. Stała cena, demo co tydzień, kod w 100% twój.",
-  },
+  metadataBase: new URL(SITE_URL),
   robots: { index: true, follow: true },
 };
 
@@ -50,15 +29,19 @@ export const viewport: Viewport = {
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: SITE.name,
+  name: "Yevhen Kapush",
   jobTitle: "Freelance Developer",
-  email: `mailto:${SITE.email}`,
-  url: SITE.url,
+  email: "mailto:jeka.kapush@gmail.com",
+  url: SITE_URL,
   address: { "@type": "PostalAddress", addressLocality: "Warsaw", addressCountry: "PL" },
-  sameAs: [SITE.github],
+  sameAs: ["https://github.com/Zhenya28"],
   knowsLanguage: ["uk", "ru", "pl", "en"],
 };
 
+/*
+  The locale lives in the [locale] segment; <html lang> defaults to "pl" and is
+  corrected client-side by LocaleProvider. Per-page metadata carries hreflang.
+*/
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl" className={`${inter.variable} ${jetbrains.variable}`}>

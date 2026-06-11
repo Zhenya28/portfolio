@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
-import { SITE } from "@/lib/data";
 import { Reveal, SectionHead } from "./Reveal";
 import { ArrowRightIcon, GitHubIcon, LinkedInIcon, MailIcon } from "./icons";
+import { useDict } from "./LocaleProvider";
 
 type FormState = "idle" | "sending" | "done" | "error";
 
 export function Contact() {
+  const dict = useDict();
+  const t = dict.contact;
   const [state, setState] = useState<FormState>("idle");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -34,33 +36,31 @@ export function Contact() {
 
   return (
     <section id="contact" className="section-pad pb-[clamp(72px,10vh,120px)] pt-[clamp(72px,12vh,140px)]">
-      <SectionHead no="05" slug="kontakt" title="Kontakt" note="odpowiedź w 24h" />
+      <SectionHead no={t.no} slug={t.slug} title={t.title} note={t.note} />
       <div className="grid gap-[clamp(28px,6vw,96px)] pt-[clamp(32px,6vh,56px)] lg:grid-cols-2">
         <Reveal>
           <h3 className="text-[clamp(1.8rem,3.6vw,2.8rem)] font-bold leading-[1.08] tracking-tight">
-            Masz coś{" "}
+            {t.h3a}{" "}
             <span className="bg-linear-to-r from-signal to-violet bg-clip-text text-transparent">
-              wartego zbudowania?
+              {t.h3Accent}
             </span>
           </h3>
-          <p className="mt-4 max-w-[44ch] text-muted">
-            Opisz problem w trzech zdaniach. W 24 godziny dostaniesz odpowiedź — a jeśli to dobry
-            fit, konkretny plan i stałą cenę. Bez spotkań &bdquo;na poznanie się&rdquo;.
-          </p>
+          <p className="mt-4 max-w-[44ch] text-muted">{t.p}</p>
           <div className="mono mt-5 flex flex-wrap gap-x-5 gap-y-1.5 text-[0.75rem] text-faint">
-            <span><span className="text-signal">✓</span> wycena w 48 h</span>
-            <span><span className="text-signal">✓</span> stała cena</span>
-            <span><span className="text-signal">✓</span> NDA — nie ma problemu</span>
-            <span><span className="text-signal">✓</span> faktura lub umowa</span>
+            {t.trust.map((item) => (
+              <span key={item}>
+                <span className="text-signal">✓</span> {item}
+              </span>
+            ))}
           </div>
           <div className="mono mt-8 flex flex-col gap-3 text-[0.875rem]">
-            <a href={`mailto:${SITE.email}`} className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
-              <MailIcon className="size-4 flex-none" /> {SITE.email}
+            <a href={`mailto:${dict.site.email}`} className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
+              <MailIcon className="size-4 flex-none" /> {dict.site.email}
             </a>
-            <a href={SITE.github} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
+            <a href={dict.site.github} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
               <GitHubIcon className="size-4 flex-none" /> github.com/Zhenya28
             </a>
-            <a href={SITE.linkedin} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
+            <a href={dict.site.linkedin} target="_blank" rel="noopener noreferrer" className="flex w-fit items-center gap-3 text-muted transition-colors hover:text-signal">
               <LinkedInIcon className="size-4 flex-none" /> linkedin
             </a>
           </div>
@@ -69,8 +69,8 @@ export function Contact() {
         <Reveal delay={0.1}>
           <div className="overflow-hidden rounded-xl border bg-panel hairline-strong">
             <div className="mono flex items-baseline justify-between gap-3 border-b px-5 py-3.5 text-[0.6875rem] text-faint hairline sm:px-6">
-              <span>./rozpocznij-projekt</span>
-              <span className="text-signal">--interaktywnie</span>
+              <span>{t.formTitle}</span>
+              <span className="text-signal">{t.formFlag}</span>
             </div>
 
             {state === "done" ? (
@@ -81,23 +81,23 @@ export function Contact() {
                 role="status"
                 className="mono flex flex-col gap-2 p-6 text-[0.875rem] sm:p-8"
               >
-                <span className="text-signal">▸ status: 200 OK — wiadomość dostarczona</span>
-                <span className="text-muted">▸ czas odpowiedzi: &lt; 24h, zwykle szybciej</span>
-                <span className="text-faint">▸ exit 0 · do usłyszenia</span>
+                <span className="text-signal">{t.doneTitle}</span>
+                <span className="text-muted">{t.doneEta}</span>
+                <span className="text-faint">{t.doneBye}</span>
               </motion.div>
             ) : (
               <form className="flex flex-col p-5 sm:p-6" onSubmit={onSubmit} noValidate>
                 <div className="field">
-                  <label className="label mb-1.5 block" htmlFor="f-name">--imie</label>
-                  <input id="f-name" name="name" type="text" autoComplete="name" required maxLength={100} placeholder="Jan Kowalski" />
+                  <label className="label mb-1.5 block" htmlFor="f-name">{t.name}</label>
+                  <input id="f-name" name="name" type="text" autoComplete="name" required maxLength={100} placeholder={t.namePh} />
                 </div>
                 <div className="field">
                   <label className="label mb-1.5 block" htmlFor="f-email">--email</label>
-                  <input id="f-email" name="email" type="email" autoComplete="email" required maxLength={200} placeholder="jan@firma.pl" />
+                  <input id="f-email" name="email" type="email" autoComplete="email" required maxLength={200} placeholder={t.emailPh} />
                 </div>
                 <div className="field">
-                  <label className="label mb-1.5 block" htmlFor="f-msg">--opis</label>
-                  <textarea id="f-msg" name="message" rows={4} required maxLength={5000} placeholder="Aplikacja, dashboard, bot…" />
+                  <label className="label mb-1.5 block" htmlFor="f-msg">{t.msg}</label>
+                  <textarea id="f-msg" name="message" rows={4} required maxLength={5000} placeholder={t.msgPh} />
                 </div>
                 {/* honeypot — hidden from humans, irresistible to bots */}
                 <input
@@ -109,11 +109,11 @@ export function Contact() {
                   className="absolute -left-[9999px] size-px opacity-0"
                 />
                 <button className="btn btn--signal mt-6 self-start" type="submit" disabled={state === "sending"}>
-                  {state === "sending" ? "wysyłanie…" : "wyślij"} <ArrowRightIcon />
+                  {state === "sending" ? t.sending : t.send} <ArrowRightIcon />
                 </button>
                 {state === "error" && (
                   <p role="alert" className="mono mt-3 text-[0.8125rem] text-amber">
-                    ▸ wysyłka nie powiodła się — napisz bezpośrednio: {SITE.email}
+                    {t.error} {dict.site.email}
                   </p>
                 )}
               </form>

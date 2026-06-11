@@ -1,24 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { PROJECTS } from "@/lib/data";
 import { Reveal, SectionHead } from "./Reveal";
-import { GitHubIcon } from "./icons";
+import { ArrowRightIcon, GitHubIcon } from "./icons";
+import { useDict, useLocale } from "./LocaleProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/* the three beats every case is told in */
-const BEATS = [
-  { key: "problem", label: "wyzwanie", tone: "text-amber" },
-  { key: "built", label: "co zbudowałem", tone: "text-muted" },
-  { key: "result", label: "efekt", tone: "text-signal" },
-] as const;
-
 export function Work() {
+  const dict = useDict();
+  const locale = useLocale();
+  const t = dict.work;
+  const PROJECTS = t.items;
+
   const [active, setActive] = useState(0);
   const reduced = useReducedMotion();
   const project = PROJECTS[active];
+
+  const beats = [
+    { key: "problem" as const, label: t.beats.problem, tone: "text-amber" },
+    { key: "built" as const, label: t.beats.built, tone: "text-muted" },
+    { key: "result" as const, label: t.beats.result, tone: "text-signal" },
+  ];
 
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown" || e.key === "ArrowRight") {
@@ -33,19 +38,12 @@ export function Work() {
 
   return (
     <section id="work" className="section-pad pt-[clamp(72px,12vh,140px)]">
-      <SectionHead
-        no="02"
-        slug="dowiezione_projekty"
-        title="Dowiezione projekty"
-        note="wybierz case — wyzwanie, rozwiązanie, efekt"
-      />
+      <SectionHead no={t.no} slug={t.slug} title={t.title} note={t.note} />
 
       <Reveal>
         <div className="mt-[clamp(28px,5vh,48px)] grid gap-4 lg:grid-cols-[minmax(0,36%)_1fr] lg:gap-5">
-          {/* selector — a monitor-style list */}
           <div
             role="tablist"
-            aria-label="Projekty"
             aria-orientation="vertical"
             onKeyDown={onKeyDown}
             className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0"
@@ -54,7 +52,7 @@ export function Work() {
               const selected = i === active;
               return (
                 <button
-                  key={p.no}
+                  key={p.slug}
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setActive(i)}
@@ -64,10 +62,8 @@ export function Work() {
                       : "border-(--line) bg-panel/40 hover:border-(--line-strong)"
                   }`}
                 >
-                  <span
-                    className={`mono text-[0.8125rem] ${selected ? "text-signal" : "text-faint"}`}
-                  >
-                    {p.no}
+                  <span className={`mono text-[0.8125rem] ${selected ? "text-signal" : "text-faint"}`}>
+                    {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="min-w-0">
                     <span className="block truncate text-[1rem] font-bold leading-tight tracking-tight">
@@ -78,24 +74,19 @@ export function Work() {
                   <span className="ml-auto flex shrink-0 items-center gap-1.5">
                     <span
                       className={`size-1.5 rounded-full ${
-                        selected
-                          ? "bg-signal [animation:pulse_2.4s_ease-in-out_infinite]"
-                          : "bg-(--line-strong)"
+                        selected ? "bg-signal [animation:pulse_2.4s_ease-in-out_infinite]" : "bg-(--line-strong)"
                       }`}
                     />
                     <span className={`mono text-[0.65rem] ${selected ? "text-signal" : "text-faint"}`}>
-                      live
+                      {t.live}
                     </span>
                   </span>
                 </button>
               );
             })}
-            <p className="mono hidden pt-2 text-[0.6875rem] text-faint lg:block">
-              ↑ ↓ działają też strzałki
-            </p>
+            <p className="mono hidden pt-2 text-[0.6875rem] text-faint lg:block">{t.hint}</p>
           </div>
 
-          {/* case panel */}
           <div className="relative min-h-[460px] overflow-hidden rounded-xl border bg-panel hairline-strong">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
@@ -109,7 +100,7 @@ export function Work() {
               >
                 <div className="mono flex items-baseline justify-between gap-3 text-[0.6875rem] text-faint">
                   <span className="truncate">{project.path}</span>
-                  <span className="shrink-0 text-signal">[{project.no}]</span>
+                  <span className="shrink-0 text-signal">[{String(active + 1).padStart(2, "0")}]</span>
                 </div>
 
                 <h3 className="mt-3 text-[clamp(1.6rem,3vw,2.3rem)] font-bold leading-tight tracking-tight">
@@ -118,7 +109,7 @@ export function Work() {
                 <span className="label label--signal mt-1 block">{project.kind}</span>
 
                 <div className="mt-6 flex flex-col gap-5">
-                  {BEATS.map((beat, i) => (
+                  {beats.map((beat, i) => (
                     <motion.div
                       key={beat.key}
                       initial={reduced ? false : { opacity: 0, y: 10 }}
@@ -150,14 +141,22 @@ export function Work() {
                       </span>
                     ))}
                   </div>
-                  <a
-                    href={project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mono inline-flex shrink-0 items-center gap-2 text-[0.6875rem] uppercase tracking-[0.08em] text-muted transition-colors hover:text-signal"
-                  >
-                    <GitHubIcon className="size-3.5" /> zobacz kod
-                  </a>
+                  <div className="flex shrink-0 items-center gap-5">
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mono inline-flex items-center gap-2 text-[0.6875rem] uppercase tracking-[0.08em] text-muted transition-colors hover:text-signal"
+                    >
+                      <GitHubIcon className="size-3.5" /> {t.codeCta}
+                    </a>
+                    <Link
+                      href={`/${locale}/projekty/${project.slug}`}
+                      className="mono inline-flex items-center gap-1.5 text-[0.6875rem] uppercase tracking-[0.08em] text-signal transition-colors hover:text-text"
+                    >
+                      {t.caseCta} <ArrowRightIcon className="size-3" />
+                    </Link>
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>

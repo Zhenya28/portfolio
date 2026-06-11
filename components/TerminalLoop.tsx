@@ -2,68 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { useDict } from "./LocaleProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-type Line = {
-  text: string;
-  tone?: "signal" | "amber" | "faint" | "text";
-  /** show a braille spinner while this is the newest visible line */
-  pending?: boolean;
-};
-
-type Scene = {
-  path: string;
-  command: string;
-  lines: Line[];
-  footer: string;
-};
-
-/* Jedna scena na każdą rzecz, którą klient realnie dostaje — proste słowa, skórka terminala. */
-const SCENES: Scene[] = [
-  {
-    path: "~/co-dostajesz/aplikacje",
-    command: './zbuduj-aplikacje "twój pomysł"',
-    lines: [
-      { text: "zamieniam pomysł w konkretny plan…", pending: true, tone: "faint" },
-      { text: "✓ projekt + kod — jedna osoba, bez agencji", tone: "text" },
-      { text: "✓ działa na web i mobile w kilka tygodni", tone: "signal" },
-      { text: "kod w 100% należy do ciebie", tone: "amber" },
-    ],
-    footer: "aplikacje webowe i mobilne",
-  },
-  {
-    path: "~/co-dostajesz/automatyzacja",
-    command: './zautomatyzuj "nudne zadania"',
-    lines: [
-      { text: "szukam tego, co pożera twój czas…", pending: true, tone: "faint" },
-      { text: "✓ raporty, maile i dane na autopilocie", tone: "text" },
-      { text: "✓ działa 24/7, nie bierze urlopu", tone: "signal" },
-      { text: "odzyskane godziny w każdym tygodniu", tone: "amber" },
-    ],
-    footer: "automatyzacja procesów",
-  },
-  {
-    path: "~/jak-pracujemy",
-    command: "./wspolpraca",
-    lines: [
-      { text: "czytam twój brief…", pending: true, tone: "faint" },
-      { text: "✓ jasne aktualizacje, zero żargonu", tone: "text" },
-      { text: "✓ uczciwy plan i cena przed startem", tone: "signal" },
-      { text: "4 języki · odpowiedź poniżej 24h", tone: "amber" },
-    ],
-    footer: "prosta współpraca",
-  },
-];
-
-const TYPE_MS = 58; // per character
-const LINE_MS = 850; // per output line
-const HOLD_MS = 4200; // pause on finished scene
-const FADE_MS = 650; // crossfade between scenes
+const TYPE_MS = 58;
+const LINE_MS = 850;
+const HOLD_MS = 4200;
+const FADE_MS = 650;
 
 const SPINNER = ["⠋", "⠙", "⠸", "⠴", "⠦", "⠇"];
 
-const toneClass: Record<NonNullable<Line["tone"]>, string> = {
+const toneClass: Record<string, string> = {
   signal: "text-signal",
   amber: "text-amber",
   faint: "text-faint",
@@ -72,6 +22,9 @@ const toneClass: Record<NonNullable<Line["tone"]>, string> = {
 
 export function TerminalLoop() {
   const reduced = useReducedMotion();
+  const dict = useDict();
+  const SCENES = dict.terminal.scenes;
+
   const [scene, setScene] = useState(0);
   const [typed, setTyped] = useState(0);
   const [shown, setShown] = useState(0);
@@ -79,10 +32,8 @@ export function TerminalLoop() {
   const [spin, setSpin] = useState(0);
 
   const current = SCENES[scene];
-  const typingDone = typed >= current.command.length;
   const allShown = shown >= current.lines.length;
 
-  /* one scheduled timeline per scene; everything cleans up on unmount/skip */
   useEffect(() => {
     if (reduced) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -108,16 +59,14 @@ export function TerminalLoop() {
     );
 
     return () => timers.forEach(clearTimeout);
-  }, [scene, reduced]);
+  }, [scene, reduced, SCENES]);
 
-  /* braille spinner for the newest pending line */
   useEffect(() => {
     if (reduced) return;
     const id = setInterval(() => setSpin((s) => (s + 1) % SPINNER.length), 120);
     return () => clearInterval(id);
   }, [reduced]);
 
-  /* reduced motion: render the first scene fully, static */
   const staticMode = !!reduced;
   const visibleTyped = staticMode ? current.command.length : typed;
   const visibleShown = staticMode ? current.lines.length : shown;
@@ -127,7 +76,7 @@ export function TerminalLoop() {
       initial={reduced ? false : { opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: EASE, delay: 0.35 }}
-      className="panel w-full overflow-hidden"
+      className="panel overflow-hidden"
     >
       <div className="panel__bar">
         <span className="panel__dot" />
@@ -138,14 +87,13 @@ export function TerminalLoop() {
         </span>
         <span className="ml-auto hidden items-center gap-1.5 text-signal sm:flex">
           <span className="inline-block size-1.5 rounded-full bg-signal [animation:pulse_2s_ease-in-out_infinite]" />
-          live
+          {dict.terminal.live}
         </span>
       </div>
 
       <div
-        className="mono min-h-[260px] overflow-x-auto p-5 text-[0.8125rem] leading-[1.95] transition-opacity duration-500 ease-out sm:min-h-[292px] sm:p-6 sm:text-[0.9375rem]"
+        className="mono min-h-[232px] overflow-x-auto p-4 text-[0.75rem] leading-[1.9] transition-opacity duration-500 ease-out sm:p-5 sm:text-[0.8125rem]"
         style={{ opacity: fading ? 0 : 1 }}
-        aria-label="Animacja terminala pokazująca, co dostajesz: aplikacje, automatyzację i prostą współpracę"
       >
         <div className="flex gap-3 whitespace-nowrap">
           <span className="shrink-0 text-signal">$</span>

@@ -1,14 +1,16 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { STATS } from "@/lib/data";
 import { ArrowDownIcon } from "./icons";
 import { TerminalLoop } from "./TerminalLoop";
+import { useDict } from "./LocaleProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 export function Hero() {
   const reduced = useReducedMotion();
+  const dict = useDict();
+  const t = dict.hero;
 
   return (
     <section id="top" className="section-pad relative flex min-h-svh flex-col justify-center overflow-hidden pb-12 pt-28">
@@ -22,7 +24,7 @@ export function Hero() {
             transition={{ duration: 0.6, ease: EASE }}
             className="mono text-[0.8125rem] text-muted"
           >
-            <span className="text-signal">$</span> ./pomysl --na "aplikację, dashboard, bota"
+            <span className="text-signal">$</span> {t.prompt.slice(2)}
           </motion.p>
 
           <h1 className="mt-5 text-[clamp(2.7rem,6.8vw,5.4rem)] font-extrabold leading-[1.02] tracking-[-0.03em]">
@@ -32,7 +34,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: EASE, delay: 0.1 }}
             >
-              Pomysł jest twój.
+              {t.h1a}
             </motion.span>
             <motion.span
               className="block text-muted"
@@ -40,7 +42,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, ease: EASE, delay: 0.22 }}
             >
-              Dowiezienie — <span className="text-signal">moje.</span>
+              {t.h1b} <span className="text-signal">{t.h1bAccent}</span>
             </motion.span>
           </h1>
 
@@ -50,13 +52,8 @@ export function Hero() {
             transition={{ duration: 0.8, ease: EASE, delay: 0.4 }}
             className="mt-6 max-w-[54ch]"
           >
-            <p className="text-[clamp(0.95rem,1.2vw,1.1rem)] text-muted">
-              Aplikacje webowe, mobilne i automatyzacje — od pierwszej rozmowy do wdrożenia
-              na produkcję. Stała cena, działające demo co tydzień, kod w 100% twój.
-            </p>
-            <p className="mono mt-3 text-[0.75rem] text-faint">
-              — Yevhen Kapush · freelance developer · Warszawa
-            </p>
+            <p className="text-[clamp(0.95rem,1.2vw,1.1rem)] text-muted">{t.sub}</p>
+            <p className="mono mt-3 text-[0.75rem] text-faint">{t.sign}</p>
           </motion.div>
 
           <motion.div
@@ -66,15 +63,14 @@ export function Hero() {
             className="mt-8 flex flex-wrap gap-3"
           >
             <a className="btn btn--signal" href="#contact">
-              ./omów-projekt
+              {t.ctaPrimary}
             </a>
             <a className="btn" href="#process">
-              ./jak-pracuję <ArrowDownIcon />
+              {t.ctaSecondary} <ArrowDownIcon />
             </a>
           </motion.div>
         </div>
 
-        {/* looping terminal — what you get, in plain words */}
         <div className="relative">
           <div
             aria-hidden
@@ -90,9 +86,8 @@ export function Hero() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, ease: EASE, delay: 0.9 }}
         className="relative mt-[clamp(40px,8vh,80px)] grid grid-cols-2 gap-px overflow-hidden rounded-lg border hairline-strong bg-(--line) md:grid-cols-4"
-        aria-label="Liczby"
       >
-        {STATS.map((stat, i) => (
+        {dict.stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={reduced ? false : { opacity: 0, y: 10 }}
