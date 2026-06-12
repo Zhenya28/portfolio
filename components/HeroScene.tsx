@@ -1,14 +1,14 @@
 "use client";
 
 /*
-  Hero 3D — "idea → delivery" particle morph.
-  A cloud of violet particles (the idea) drifts across the whole hero,
-  then assembles into one of three procedural shapes — globe / cube
-  lattice / trefoil knot (websites / apps / automations) — anchored to
-  the right so the headline stays readable. It lights up signal-green,
-  dissolves back into the cloud, repeats. Runs entirely on the GPU via
-  a custom point shader; pauses offscreen, freezes for
-  prefers-reduced-motion, falls back to a glow without WebGL.
+  Hero 3D — a single particle sculpture, anchored right of the headline.
+  Three procedural shapes — globe / blueprint cube / double helix
+  (web presence / application architecture / automation & AI) — morph
+  directly into one another in a slow loop. Particles always hold a
+  form: signal-green when settled, shifting violet while in flight
+  between shapes. No scatter phase, nothing crosses into the text.
+  Runs entirely on the GPU via a custom point shader; pauses offscreen,
+  freezes for prefers-reduced-motion, falls back to a glow without WebGL.
 */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -16,27 +16,14 @@ import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useReducedMotion } from "motion/react";
 
-const COUNT = 4500;
+const COUNT = 2000;
 
-/* ── procedural targets ─────────────────────────────────────────── */
-
-// gaussian-ish distribution around the shape anchor: dense in the
-// middle, fading softly outwards, so the cloud never shows a hard frame
-function makeChaos(n: number, sx: number, sy: number) {
-  const arr = new Float32Array(n * 3);
-  const g = () => (Math.random() + Math.random() + Math.random()) / 1.5 - 1;
-  for (let i = 0; i < n; i++) {
-    arr[i * 3] = g() * sx;
-    arr[i * 3 + 1] = g() * sy;
-    arr[i * 3 + 2] = g() * 1.5;
-  }
-  return arr;
-}
+/* ── procedural shapes, all roughly the same visual mass ────────── */
 
 function makeGlobe(n: number) {
   const arr = new Float32Array(n * 3);
   const golden = Math.PI * (Math.sqrt(5) - 1);
-  const R = 1.18;
+  const R = 1.3;
   for (let i = 0; i < n; i++) {
     const y = 1 - (i / (n - 1)) * 2;
     const rad = Math.sqrt(Math.max(0, 1 - y * y));
@@ -50,7 +37,7 @@ function makeGlobe(n: number) {
 
 function makeCube(n: number) {
   const arr = new Float32Array(n * 3);
-  const s = 0.84;
+  const s = 0.9;
   const lines = 5;
   for (let i = 0; i < n; i++) {
     const u = Math.random() * 2 - 1;
@@ -87,18 +74,34 @@ function makeCube(n: number) {
   return arr;
 }
 
-function makeKnot(n: number) {
+function makeHelix(n: number) {
   const arr = new Float32Array(n * 3);
-  const scale = 0.42;
+  const turns = 2.4 * Math.PI;
+  const R = 0.62;
+  const halfH = 1.35;
+  const rungs = 9;
   for (let i = 0; i < n; i++) {
-    const t = Math.random() * Math.PI * 2;
-    // trefoil knot + a little tube thickness
-    const x = Math.sin(t) + 2 * Math.sin(2 * t);
-    const y = Math.cos(t) - 2 * Math.cos(2 * t);
-    const z = -Math.sin(3 * t);
-    arr[i * 3] = x * scale + (Math.random() - 0.5) * 0.16;
-    arr[i * 3 + 1] = y * scale + (Math.random() - 0.5) * 0.16;
-    arr[i * 3 + 2] = z * scale + (Math.random() - 0.5) * 0.16;
+    const roll = Math.random();
+    let x: number, y: number, z: number;
+    if (roll < 0.8) {
+      // the two strands
+      const t = Math.random() * turns;
+      const phase = roll < 0.4 ? 0 : Math.PI;
+      x = Math.cos(t + phase) * R;
+      z = Math.sin(t + phase) * R;
+      y = (t / turns) * 2 * halfH - halfH;
+    } else {
+      // rungs between the strands
+      const k = Math.floor(Math.random() * rungs);
+      const t = ((k + 0.5) / rungs) * turns;
+      const u = Math.random() * 2 - 1;
+      x = Math.cos(t) * R * u;
+      z = Math.sin(t) * R * u;
+      y = ((k + 0.5) / rungs) * 2 * halfH - halfH;
+    }
+    arr[i * 3] = x + (Math.random() - 0.5) * 0.07;
+    arr[i * 3 + 1] = y + (Math.random() - 0.5) * 0.07;
+    arr[i * 3 + 2] = z + (Math.random() - 0.5) * 0.07;
   }
   return arr;
 }
@@ -108,18 +111,14 @@ function makeKnot(n: number) {
 const VERT = /* glsl */ `
   uniform float uTime;
   uniform float uProgress;
-  uniform float uFromShaped;
-  uniform float uToShaped;
   uniform float uSize;
   uniform float uSpin;
-  uniform vec2 uFade;
   attribute vec3 aFrom;
   attribute vec3 aTo;
   attribute float aSeed;
-  varying float vShaped;
+  varying float vTransit;
   varying float vSeed;
   varying float vTwinkle;
-  varying float vFade;
 
   vec3 rotY(vec3 p, float a) {
     float c = cos(a), s = sin(a);
@@ -131,75 +130,62 @@ const VERT = /* glsl */ `
     float t = clamp(uProgress * 1.35 - aSeed * 0.35, 0.0, 1.0);
     t = t * t * (3.0 - 2.0 * t);
 
-    // only shaped endpoints spin; the free cloud stays put
-    vec3 from = rotY(aFrom, uSpin * uFromShaped);
-    vec3 to = rotY(aTo, uSpin * uToShaped);
-    vec3 pos = mix(from, to, t);
+    vec3 pos = mix(aFrom, aTo, t);
 
     // particles bow outward mid-flight
     float arc = sin(t * 3.14159265);
     pos += vec3(
-      sin(aSeed * 78.233 + uTime * 0.4),
+      sin(aSeed * 78.233),
       cos(aSeed * 43.758),
       sin(aSeed * 12.9898)
-    ) * arc * 0.38 * (0.3 + aSeed * 0.7);
+    ) * arc * 0.45 * (0.3 + aSeed * 0.7);
 
-    float shaped = mix(uFromShaped, uToShaped, t);
+    // the whole sculpture turns slowly
+    pos = rotY(pos, uSpin);
 
-    // restless drift while unformed
-    pos += (1.0 - shaped) * 0.16 * vec3(
-      sin(uTime * 0.7 + aSeed * 31.4),
-      sin(uTime * 0.9 + aSeed * 17.2),
-      cos(uTime * 0.6 + aSeed * 23.7)
-    );
+    // breathing
+    pos *= 1.0 + 0.014 * sin(uTime * 1.4 + aSeed * 6.2831);
 
-    // breathing once formed
-    pos *= 1.0 + shaped * 0.012 * sin(uTime * 1.6 + aSeed * 6.2831);
-
-    vec4 wp = modelMatrix * vec4(pos, 1.0);
-    vec4 mv = viewMatrix * wp;
+    vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
-    gl_PointSize = uSize * (0.55 + aSeed * 0.9) * mix(1.1, 0.85, shaped) / -mv.z;
+    gl_PointSize = uSize * (0.6 + aSeed * 0.9) / -mv.z;
 
-    // free particles dim over the headline on the left; the formed
-    // shape is unaffected
-    vFade = mix(mix(0.06, 1.0, smoothstep(uFade.x, uFade.y, wp.x)), 1.0, shaped);
-    vShaped = shaped;
+    vTransit = arc;
     vSeed = aSeed;
-    vTwinkle = 0.72 + 0.28 * sin(uTime * 2.0 + aSeed * 40.0);
+    vTwinkle = 0.78 + 0.22 * sin(uTime * 2.0 + aSeed * 40.0);
   }
 `;
 
 const FRAG = /* glsl */ `
   uniform float uFlash;
-  varying float vShaped;
+  varying float vTransit;
   varying float vSeed;
   varying float vTwinkle;
-  varying float vFade;
 
   void main() {
     float d = length(gl_PointCoord - 0.5);
-    float alpha = smoothstep(0.5, 0.16, d);
+    float alpha = smoothstep(0.5, 0.2, d);
     if (alpha < 0.01) discard;
 
     vec3 violet = vec3(0.553, 0.482, 1.0);          /* #8D7BFF */
     vec3 lime   = vec3(0.624, 0.937, 0.0) * 0.78;   /* #9FEF00, headroom for additive stacking */
     vec3 amber  = vec3(1.0, 0.698, 0.141);          /* #FFB224 */
 
-    vec3 col = mix(violet, lime, vShaped);
-    // sparse amber accents once formed
-    col = mix(col, amber, step(0.95, fract(vSeed * 7.31)) * vShaped);
-    // completion flash
+    // settled particles glow lime; in-flight ones shift violet
+    vec3 col = mix(lime, violet, vTransit * 0.85);
+    // sparse amber accents
+    col = mix(col, amber, step(0.95, fract(vSeed * 7.31)) * (1.0 - vTransit));
+    // arrival flash
     col += uFlash * lime * 0.4;
 
-    gl_FragColor = vec4(col, alpha * (0.65 + 0.25 * vShaped) * vTwinkle * vFade);
+    gl_FragColor = vec4(col, alpha * (0.85 - 0.25 * vTransit) * vTwinkle);
   }
 `;
 
 /* ── the particle system ────────────────────────────────────────── */
 
-type Phase = "form" | "hold" | "dissolve" | "drift";
-const DUR: Record<Phase, number> = { form: 2.6, hold: 3.4, dissolve: 1.5, drift: 1.1 };
+type Phase = "hold" | "morph";
+const DUR: Record<Phase, number> = { hold: 4.2, morph: 2.4 };
 
 const easeInOut = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -210,20 +196,11 @@ function Particles({ frozen }: { frozen: boolean }) {
   const dpr = useThree((s) => s.viewport.dpr);
   const viewport = useThree((s) => s.viewport);
 
-  // quantized so the cloud only regenerates on real resizes
-  const vw = Math.round(viewport.width * 2) / 2;
-  const vh = Math.round(viewport.height * 2) / 2;
-  const wide = vw / vh >= 1.05;
-
   const data = useMemo(() => {
     const seeds = new Float32Array(COUNT);
     for (let i = 0; i < COUNT; i++) seeds[i] = Math.random();
-    return {
-      chaos: makeChaos(COUNT, wide ? vw * 0.26 : vw * 0.55, wide ? vh * 0.5 : vh * 0.35),
-      shapes: [makeGlobe(COUNT), makeCube(COUNT), makeKnot(COUNT)],
-      seeds,
-    };
-  }, [vw, vh, wide]);
+    return { shapes: [makeGlobe(COUNT), makeCube(COUNT), makeHelix(COUNT)], seeds };
+  }, []);
 
   // built imperatively: R3F clones a `uniforms` prop, which would break
   // the per-frame mutations below
@@ -232,13 +209,10 @@ function Particles({ frozen }: { frozen: boolean }) {
       new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uProgress: { value: frozen ? 1 : 0 },
-          uFromShaped: { value: 0 },
-          uToShaped: { value: 1 },
+          uProgress: { value: 1 },
           uFlash: { value: 0 },
           uSize: { value: 12 },
           uSpin: { value: 0 },
-          uFade: { value: new THREE.Vector2(-1000, -999) },
         },
         vertexShader: VERT,
         fragmentShader: FRAG,
@@ -246,7 +220,6 @@ function Particles({ frozen }: { frozen: boolean }) {
         depthWrite: false,
         blending: THREE.AdditiveBlending,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const uniforms = material.uniforms;
@@ -256,8 +229,8 @@ function Particles({ frozen }: { frozen: boolean }) {
   // wiping the retargeting done in useFrame
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(data.chaos.slice(), 3));
-    g.setAttribute("aFrom", new THREE.BufferAttribute(data.chaos.slice(), 3));
+    g.setAttribute("position", new THREE.BufferAttribute(data.shapes[0].slice(), 3));
+    g.setAttribute("aFrom", new THREE.BufferAttribute(data.shapes[0].slice(), 3));
     g.setAttribute("aTo", new THREE.BufferAttribute(data.shapes[0].slice(), 3));
     g.setAttribute("aSeed", new THREE.BufferAttribute(data.seeds, 1));
     return g;
@@ -272,38 +245,11 @@ function Particles({ frozen }: { frozen: boolean }) {
   );
 
   useEffect(() => {
-    uniforms.uSize.value = size.height * dpr * 0.028;
-    uniforms.uFade.value.set(wide ? -vw * 0.1 : -1000, wide ? vw * 0.06 : -999);
-  }, [size, dpr, wide, vw, uniforms]);
+    uniforms.uSize.value = size.height * dpr * 0.034;
+  }, [size, dpr, uniforms]);
 
-  const anim = useRef({ phase: "form" as Phase, t: 0, shape: 0, flash: 0, spin: 0 });
+  const anim = useRef({ phase: "hold" as Phase, t: 0, shape: 0, flash: 0, spin: 0 });
   const mouse = useRef({ x: 0, y: 0 });
-
-  const fillTargets = (from: Float32Array, to: Float32Array) => {
-    const aFrom = geometry.attributes.aFrom as THREE.BufferAttribute;
-    const aTo = geometry.attributes.aTo as THREE.BufferAttribute;
-    (aFrom.array as Float32Array).set(from);
-    (aTo.array as Float32Array).set(to);
-    aFrom.needsUpdate = true;
-    aTo.needsUpdate = true;
-  };
-
-  const retarget = (from: Float32Array, to: Float32Array, fromShaped: number, toShaped: number) => {
-    fillTargets(from, to);
-    uniforms.uProgress.value = 0;
-    uniforms.uFromShaped.value = fromShaped;
-    uniforms.uToShaped.value = toShaped;
-  };
-
-  // after a resize regenerates the buffers, restore the endpoints of
-  // whatever transition is in flight (uniforms stay valid)
-  useEffect(() => {
-    const s = anim.current;
-    if (s.phase === "form" || s.phase === "hold") fillTargets(data.chaos, data.shapes[s.shape]);
-    else if (s.phase === "dissolve") fillTargets(data.shapes[s.shape], data.chaos);
-    else fillTargets(data.chaos, data.chaos);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geometry]);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -314,10 +260,21 @@ function Particles({ frozen }: { frozen: boolean }) {
     return () => window.removeEventListener("pointermove", onMove);
   }, []);
 
+  const retarget = (from: Float32Array, to: Float32Array) => {
+    const aFrom = geometry.attributes.aFrom as THREE.BufferAttribute;
+    const aTo = geometry.attributes.aTo as THREE.BufferAttribute;
+    (aFrom.array as Float32Array).set(from);
+    (aTo.array as Float32Array).set(to);
+    aFrom.needsUpdate = true;
+    aTo.needsUpdate = true;
+    uniforms.uProgress.value = 0;
+  };
+
   useFrame((_, rawDelta) => {
     const g = group.current!;
-    g.position.set(wide ? vw * 0.24 : 0, wide ? 0 : -vh * 0.3, 0);
-    const sc = wide ? 1 : 0.55;
+    const wide = viewport.aspect >= 1.05;
+    g.position.set(wide ? viewport.width * 0.24 : 0, wide ? 0 : -viewport.height * 0.3, 0);
+    const sc = wide ? 1 : 0.6;
     g.scale.set(sc, sc, sc);
 
     if (frozen) return;
@@ -326,39 +283,33 @@ function Particles({ frozen }: { frozen: boolean }) {
     uniforms.uTime.value += delta;
     s.t += delta;
 
-    if (s.phase === "form" || s.phase === "dissolve") {
-      const p = Math.min(1, s.t / DUR[s.phase]);
-      uniforms.uProgress.value = easeInOut(p);
-      if (p === 1) {
-        if (s.phase === "form") {
-          s.phase = "hold";
-          s.flash = 1.1;
-        } else {
-          s.phase = "drift";
-        }
+    if (s.phase === "hold") {
+      if (s.t >= DUR.hold) {
+        const next = (s.shape + 1) % data.shapes.length;
+        retarget(data.shapes[s.shape], data.shapes[next]);
+        s.shape = next;
+        s.phase = "morph";
         s.t = 0;
       }
-    } else if (s.t >= DUR[s.phase]) {
-      if (s.phase === "hold") {
-        retarget(data.shapes[s.shape], data.chaos, 1, 0);
-        s.phase = "dissolve";
-      } else {
-        s.shape = (s.shape + 1) % data.shapes.length;
-        retarget(data.chaos, data.shapes[s.shape], 0, 1);
-        s.phase = "form";
+    } else {
+      const p = Math.min(1, s.t / DUR.morph);
+      uniforms.uProgress.value = easeInOut(p);
+      if (p === 1) {
+        s.phase = "hold";
+        s.flash = 1;
+        s.t = 0;
       }
-      s.t = 0;
     }
 
     s.flash = Math.max(0, s.flash - delta * 0.8);
     uniforms.uFlash.value = s.flash;
 
-    s.spin += delta * 0.22;
+    s.spin += delta * 0.16;
     uniforms.uSpin.value = s.spin;
 
     const k = Math.min(1, delta * 3);
-    g.rotation.y += (mouse.current.x * 0.16 - g.rotation.y) * k;
-    g.rotation.x += (mouse.current.y * 0.1 - g.rotation.x) * k;
+    g.rotation.y += (mouse.current.x * 0.14 - g.rotation.y) * k;
+    g.rotation.x += (mouse.current.y * 0.09 - g.rotation.x) * k;
   });
 
   return (
@@ -375,8 +326,10 @@ export default function HeroScene() {
   const wrap = useRef<HTMLDivElement>(null);
   const [webgl, setWebgl] = useState(true);
   const [visible, setVisible] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     try {
       const c = document.createElement("canvas");
       if (!c.getContext("webgl2") && !c.getContext("webgl")) setWebgl(false);
@@ -396,7 +349,12 @@ export default function HeroScene() {
   }, []);
 
   return (
-    <div ref={wrap} className="pointer-events-none absolute inset-0" aria-hidden>
+    <div
+      ref={wrap}
+      className="pointer-events-none absolute inset-0 transition-opacity duration-1000"
+      style={{ opacity: mounted ? 1 : 0 }}
+      aria-hidden
+    >
       {webgl ? (
         <Canvas
           frameloop={reduced ? "demand" : visible ? "always" : "never"}
