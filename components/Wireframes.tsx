@@ -306,9 +306,9 @@ export function WireMarketing() {
       <svg viewBox="0 0 320 168" className="h-full w-full max-w-[420px]">
         {/* megaphone */}
         <g>
-          <path d="M22 70 L62 50 V110 L22 90 Z" fill="rgba(141,123,255,0.22)" stroke="var(--color-violet)" strokeWidth="1.6" strokeLinejoin="round" />
-          <rect x="14" y="68" width="10" height="24" rx="3" fill="var(--color-panel-2)" stroke="var(--color-violet)" strokeWidth="1.6" />
-          <path d="M34 92 v16 a4 4 0 0 0 8 0 v-12" fill="none" stroke="var(--color-violet)" strokeWidth="1.6" />
+          <path d="M22 70 L62 50 V110 L22 90 Z" fill="rgba(159,239,0,0.14)" stroke="var(--color-signal)" strokeWidth="1.6" strokeLinejoin="round" />
+          <rect x="14" y="68" width="10" height="24" rx="3" fill="var(--color-panel-2)" stroke="var(--color-signal)" strokeWidth="1.6" />
+          <path d="M34 92 v16 a4 4 0 0 0 8 0 v-12" fill="none" stroke="var(--color-signal)" strokeWidth="1.6" />
           <rect x="30" y="34" width="22" height="12" rx="3" fill="var(--color-panel-2)" stroke="var(--line-strong)" />
           <text x="41" y="43" textAnchor="middle" fontSize="8" fill="var(--color-faint)" style={{ fontFamily: "var(--font-jetbrains)" }}>
             AD
@@ -316,7 +316,7 @@ export function WireMarketing() {
         </g>
 
         {/* reach waves */}
-        <g fill="none" stroke="var(--color-violet)" strokeWidth="1.4" strokeLinecap="round">
+        <g fill="none" stroke="var(--color-signal)" strokeWidth="1.4" strokeLinecap="round">
           <path d="M72 64 a22 22 0 0 1 0 32" opacity="0.9" />
           <path d="M82 54 a36 36 0 0 1 0 52" opacity="0.55" />
           <path d="M92 44 a50 50 0 0 1 0 72" opacity="0.3" />

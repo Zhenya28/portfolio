@@ -243,29 +243,28 @@ export const pl = {
     no: "05",
     slug: "warsztat",
     title: "Warsztat",
-    note: "czym dowożę — głębia, nie chmura tagów",
-    barNote: "długość paska = przebieg na produkcji",
-    langsLabel: "języki · komunikacja bez tłumacza",
-    langsCount: "4/4",
+    note: "",
     groups: [
-      { group: "frontend", items: [
-        { name: "React", level: 0.95 }, { name: "TypeScript", level: 0.95 }, { name: "React Native", level: 0.85 },
-        { name: "Next.js", level: 0.85 }, { name: "Tailwind CSS", level: 0.8 }, { name: "Vite", level: 0.75 },
-      ]},
-      { group: "backend i dane", items: [
-        { name: "Python", level: 0.95 }, { name: "Node.js", level: 0.85 }, { name: "PostgreSQL", level: 0.8 },
-        { name: "Supabase", level: 0.8 }, { name: "Prisma", level: 0.75 },
-      ]},
-      { group: "automatyzacja i ops", items: [
-        { name: "Playwright", level: 0.95 }, { name: "GitHub Actions", level: 0.95 }, { name: "Telegram Bot API", level: 0.9 },
-        { name: "Git", level: 0.9 }, { name: "Expo", level: 0.8 },
-      ]},
-    ],
-    languages: [
-      { code: "uk-UA", name: "ukraiński", level: "ojczysty", value: 1 },
-      { code: "ru-RU", name: "rosyjski", level: "ojczysty", value: 1 },
-      { code: "pl-PL", name: "polski", level: "C1", value: 0.85 },
-      { code: "en-GB", name: "angielski", level: "B2/C1", value: 0.75 },
+      {
+        group: "frontend",
+        desc: "Interfejsy, które ładują się natychmiast i wyglądają poważnie na każdym ekranie.",
+        items: ["React", "Next.js", "React Native", "TypeScript", "Tailwind CSS", "Vite", "Expo"],
+      },
+      {
+        group: "backend, dane i płatności",
+        desc: "Logika, bazy danych, płatności online i wdrożenia na produkcję.",
+        items: ["Node.js", "Python", "PostgreSQL", "Supabase", "Prisma", "Stripe", "Vercel"],
+      },
+      {
+        group: "automatyzacja i AI",
+        desc: "Boty, scrapery, integracje i modele AI wpięte w realne procesy.",
+        items: ["Playwright", "GitHub Actions", "Telegram Bot API", "Google Gemini", "Git"],
+      },
+      {
+        group: "marketing i analityka",
+        desc: "Kampanie, mierzenie konwersji i dane, na których widać każdą złotówkę.",
+        items: ["Google Ads", "Meta Ads", "Google Analytics", "Search Console", "Tag Manager"],
+      },
     ],
   },
   contact: {

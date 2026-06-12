@@ -51,12 +51,10 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
       <section className="section-pad relative overflow-hidden pb-[clamp(36px,6vh,64px)] pt-[clamp(32px,6vh,64px)]">
         <div className="grid-bg" aria-hidden />
         <div className="relative">
-          <div className="mono flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.75rem] text-faint">
+          <div className="mono text-[0.75rem] text-faint">
             <Link href={`${home}#work`} className="transition-colors hover:text-signal">
               {caseStudy.backCta}
             </Link>
-            <span className="text-signal">{"//"}</span>
-            <span>{caseStudy.eyebrow}</span>
           </div>
           <h1 className="mt-6 max-w-4xl text-[clamp(2.4rem,5.6vw,4.4rem)] font-extrabold leading-[1.04] tracking-[-0.03em]">
             {project.title}

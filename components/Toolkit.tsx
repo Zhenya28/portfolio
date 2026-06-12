@@ -4,16 +4,24 @@ import {
   siExpo,
   siGit,
   siGithubactions,
+  siGoogleads,
+  siGoogleanalytics,
+  siGooglegemini,
+  siGooglesearchconsole,
+  siGoogletagmanager,
+  siMeta,
   siNextdotjs,
   siNodedotjs,
   siPostgresql,
   siPrisma,
   siPython,
   siReact,
+  siStripe,
   siSupabase,
   siTailwindcss,
   siTelegram,
   siTypescript,
+  siVercel,
   siVite,
 } from "simple-icons";
 import { motion, useReducedMotion } from "motion/react";
@@ -21,7 +29,6 @@ import { Reveal, SectionHead } from "./Reveal";
 import { useDict } from "./LocaleProvider";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const CELLS = 10;
 
 type Brand = { path: string; hex: string };
 
@@ -33,21 +40,29 @@ const playwright: Brand = {
 
 const BRANDS: Record<string, Brand> = {
   React: siReact,
-  TypeScript: siTypescript,
-  "React Native": siReact,
   "Next.js": siNextdotjs,
+  "React Native": siReact,
+  TypeScript: siTypescript,
   "Tailwind CSS": siTailwindcss,
   Vite: siVite,
-  Python: siPython,
+  Expo: siExpo,
   "Node.js": siNodedotjs,
+  Python: siPython,
   PostgreSQL: siPostgresql,
   Supabase: siSupabase,
   Prisma: siPrisma,
+  Stripe: siStripe,
+  Vercel: siVercel,
   Playwright: playwright,
   "GitHub Actions": siGithubactions,
   "Telegram Bot API": siTelegram,
+  "Google Gemini": siGooglegemini,
   Git: siGit,
-  Expo: siExpo,
+  "Google Ads": siGoogleads,
+  "Meta Ads": siMeta,
+  "Google Analytics": siGoogleanalytics,
+  "Search Console": siGooglesearchconsole,
+  "Tag Manager": siGoogletagmanager,
 };
 
 /* dark brand colors disappear on a dark background — lift them to text color */
@@ -68,7 +83,7 @@ function TechChip({ name, index }: { name: string; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4, ease: EASE, delay: index * 0.04 }}
-      className="flex items-center gap-2.5 rounded-lg border bg-panel/60 px-3 py-2.5 transition-colors duration-300 hairline hover:border-(--line-strong) hover:bg-panel"
+      className="flex items-center gap-2.5 rounded-full bg-panel-2 px-4 py-2.5 transition-transform duration-300 hover:-translate-y-0.5"
     >
       {brand ? (
         <svg viewBox="0 0 24 24" className="size-[18px] shrink-0" fill={brandColor(brand.hex)} aria-hidden>
@@ -82,77 +97,34 @@ function TechChip({ name, index }: { name: string; index: number }) {
   );
 }
 
-function LanguageGauge({ value, baseDelay }: { value: number; baseDelay: number }) {
-  const reduced = useReducedMotion();
-  const filled = Math.round(value * CELLS);
-  return (
-    <div className="mt-3 flex gap-1" aria-hidden>
-      {Array.from({ length: CELLS }, (_, i) =>
-        i < filled ? (
-          <motion.span
-            key={i}
-            className="h-1.5 flex-1 rounded-[2px] bg-violet"
-            initial={reduced ? false : { opacity: 0, scaleY: 0.3 }}
-            whileInView={{ opacity: 1, scaleY: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.35, ease: EASE, delay: baseDelay + i * 0.05 }}
-          />
-        ) : (
-          <span key={i} className="h-1.5 flex-1 rounded-[2px] bg-(--line)" />
-        ),
-      )}
-    </div>
-  );
-}
-
 export function Toolkit() {
   const dict = useDict();
   const t = dict.toolkit;
 
   return (
     <section id="toolkit" className="section-pad pt-[clamp(72px,12vh,140px)]">
-      <SectionHead no={t.no} slug={t.slug} title={t.title} note={t.note} />
+      <SectionHead title={t.title} />
 
-      <div className="mt-[clamp(28px,5vh,48px)] grid gap-x-10 gap-y-9 lg:grid-cols-3">
+      {/* ledger bands: label column left, icon pills right, hairlines between rows */}
+      <div className="border-b hairline">
         {t.groups.map((col, colIndex) => (
-          <Reveal key={col.group} delay={colIndex * 0.08}>
-            <div>
-              <span className="mono block text-[0.6875rem] uppercase tracking-[0.1em] text-signal">
-                {"//"} {col.group}
-              </span>
-              <div className="mt-4 flex flex-wrap gap-2">
+          <Reveal key={col.group} delay={colIndex * 0.06}>
+            <div className="grid gap-y-4 border-t py-8 hairline md:grid-cols-[minmax(0,32%)_1fr] md:gap-x-12 md:py-10">
+              <div>
+                <span className="mono text-[0.6875rem] uppercase tracking-[0.1em] text-signal">
+                  {"//"} {col.group}
+                </span>
+                <p className="mt-2.5 max-w-[34ch] text-[0.9375rem] text-muted">{col.desc}</p>
+              </div>
+              <div className="flex flex-wrap content-start items-start gap-2.5">
                 {col.items.map((item, itemIndex) => (
-                  <TechChip key={item.name} name={item.name} index={itemIndex} />
+                  <TechChip key={item} name={item} index={itemIndex} />
                 ))}
               </div>
             </div>
           </Reveal>
         ))}
       </div>
-
-      {/* human languages — violet chapter */}
-      <Reveal delay={0.15}>
-        <div className="mt-10 rounded-2xl border border-violet/25 bg-violet/[0.06] p-6 sm:p-7">
-          <div className="mono flex items-baseline justify-between text-[0.6875rem] uppercase tracking-[0.1em] text-violet">
-            <span>{t.langsLabel}</span>
-            <span>{t.langsCount}</span>
-          </div>
-          <div className="mt-6 grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:grid-cols-4">
-            {t.languages.map((lang, i) => (
-              <div key={lang.code}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="mono text-[0.9375rem] font-semibold">{lang.code}</span>
-                  <span className="mono rounded border border-violet/40 px-2 py-0.5 text-[0.6875rem] text-violet">
-                    {lang.level}
-                  </span>
-                </div>
-                <span className="label mt-1.5 block">{lang.name}</span>
-                <LanguageGauge value={lang.value} baseDelay={0.15 + i * 0.1} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Reveal>
     </section>
   );
 }

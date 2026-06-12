@@ -197,15 +197,14 @@ body {
   color: var(--color-signal);
 }
 
-/* stack token, e.g. [react-native] */
+/* stack token, e.g. [react-native] — solid pill, no outline */
 .tag {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
   color: var(--color-muted);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 4px 9px;
+  border-radius: 999px;
+  padding: 5px 11px;
   background: var(--color-panel-2);
 }
 

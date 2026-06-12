@@ -30,30 +30,14 @@ export function Reveal({
   );
 }
 
-/** Section header rendered as a code comment: `// 01 — selected_work` */
-export function SectionHead({
-  no,
-  slug,
-  title,
-  note,
-}: {
-  no: string;
-  slug: string;
-  title: string;
-  note: string;
-}) {
+/** Section header — just the title over a hairline. */
+export function SectionHead({ title }: { title: string }) {
   return (
     <Reveal>
-      <div className="flex items-end justify-between gap-4 border-b pb-5 hairline-strong">
-        <div>
-          <span className="mono block text-[0.8125rem] text-faint">
-            <span className="text-signal">{"//"}</span> {no} — {slug}
-          </span>
-          <h2 className="mt-2 text-[clamp(1.8rem,4vw,3rem)] font-bold leading-none tracking-tight">
-            {title}
-          </h2>
-        </div>
-        <span className="label hidden pb-1 text-right sm:block">{note}</span>
+      <div className="border-b pb-5 hairline-strong">
+        <h2 className="text-[clamp(1.8rem,4vw,3rem)] font-bold leading-none tracking-tight">
+          {title}
+        </h2>
       </div>
     </Reveal>
   );

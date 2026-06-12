@@ -79,29 +79,6 @@ export function Hero() {
           <TerminalLoop />
         </div>
       </div>
-
-      {/* hard numbers — proof over promises */}
-      <motion.div
-        initial={reduced ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: EASE, delay: 0.9 }}
-        className="relative mt-[clamp(40px,8vh,80px)] grid grid-cols-2 gap-px overflow-hidden rounded-lg border hairline-strong bg-(--line) md:grid-cols-4"
-      >
-        {dict.stats.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={reduced ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 1 + i * 0.1 }}
-            className="bg-panel p-4 sm:p-5"
-          >
-            <span className="mono block text-[clamp(1.4rem,2.4vw,2rem)] font-bold text-signal">
-              {stat.value}
-            </span>
-            <span className="label mt-1 block">{stat.label}</span>
-          </motion.div>
-        ))}
-      </motion.div>
     </section>
   );
 }

@@ -53,12 +53,10 @@ export default async function ServicePage({ params }: { params: Promise<Params> 
         <div className="grid-bg" aria-hidden />
         <div className="relative grid items-center gap-x-[clamp(32px,5vw,72px)] gap-y-10 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <div>
-            <div className="mono flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.75rem] text-faint">
+            <div className="mono text-[0.75rem] text-faint">
               <Link href={home} className="transition-colors hover:text-signal">
                 {common.backHome}
               </Link>
-              <span className="text-signal">{"//"}</span>
-              <span>{page.eyebrow}</span>
             </div>
             <h1 className="mt-6 text-[clamp(2.4rem,5.6vw,4.4rem)] font-extrabold leading-[1.04] tracking-[-0.03em]">
               {page.h1} <span className="text-signal">{page.h1Accent}</span>
@@ -119,11 +117,10 @@ export default async function ServicePage({ params }: { params: Promise<Params> 
       {/* packages */}
       <section id="pakiety" className="section-pad scroll-mt-24 pt-[clamp(48px,8vh,96px)]">
         <Reveal>
-          <div className="flex items-end justify-between gap-4 border-b pb-5 hairline-strong">
+          <div className="border-b pb-5 hairline-strong">
             <h2 className="text-[clamp(1.6rem,3.4vw,2.6rem)] font-bold leading-none tracking-tight">
               {common.packagesTitle}
             </h2>
-            <span className="label hidden pb-1 text-right sm:block">{common.packagesNote}</span>
           </div>
         </Reveal>
         <div className="mt-[clamp(24px,4vh,40px)] grid gap-5 lg:grid-cols-3 lg:items-stretch">

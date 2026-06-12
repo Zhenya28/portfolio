@@ -243,29 +243,28 @@ export const en: Dict = {
     no: "05",
     slug: "toolbox",
     title: "Toolbox",
-    note: "what I ship with — depth, not a tag cloud",
-    barNote: "bar length = production mileage",
-    langsLabel: "languages · communication without a translator",
-    langsCount: "4/4",
+    note: "",
     groups: [
-      { group: "frontend", items: [
-        { name: "React", level: 0.95 }, { name: "TypeScript", level: 0.95 }, { name: "React Native", level: 0.85 },
-        { name: "Next.js", level: 0.85 }, { name: "Tailwind CSS", level: 0.8 }, { name: "Vite", level: 0.75 },
-      ]},
-      { group: "backend & data", items: [
-        { name: "Python", level: 0.95 }, { name: "Node.js", level: 0.85 }, { name: "PostgreSQL", level: 0.8 },
-        { name: "Supabase", level: 0.8 }, { name: "Prisma", level: 0.75 },
-      ]},
-      { group: "automation & ops", items: [
-        { name: "Playwright", level: 0.95 }, { name: "GitHub Actions", level: 0.95 }, { name: "Telegram Bot API", level: 0.9 },
-        { name: "Git", level: 0.9 }, { name: "Expo", level: 0.8 },
-      ]},
-    ],
-    languages: [
-      { code: "uk-UA", name: "Ukrainian", level: "native", value: 1 },
-      { code: "ru-RU", name: "Russian", level: "native", value: 1 },
-      { code: "pl-PL", name: "Polish", level: "C1", value: 0.85 },
-      { code: "en-GB", name: "English", level: "B2/C1", value: 0.75 },
+      {
+        group: "frontend",
+        desc: "Interfaces that load instantly and look serious on every screen.",
+        items: ["React", "Next.js", "React Native", "TypeScript", "Tailwind CSS", "Vite", "Expo"],
+      },
+      {
+        group: "backend, data & payments",
+        desc: "Logic, databases, online payments and production deployments.",
+        items: ["Node.js", "Python", "PostgreSQL", "Supabase", "Prisma", "Stripe", "Vercel"],
+      },
+      {
+        group: "automation & AI",
+        desc: "Bots, scrapers, integrations and AI models wired into real processes.",
+        items: ["Playwright", "GitHub Actions", "Telegram Bot API", "Google Gemini", "Git"],
+      },
+      {
+        group: "marketing & analytics",
+        desc: "Campaigns, conversion tracking and data where every euro is visible.",
+        items: ["Google Ads", "Meta Ads", "Google Analytics", "Search Console", "Tag Manager"],
+      },
     ],
   },
   contact: {

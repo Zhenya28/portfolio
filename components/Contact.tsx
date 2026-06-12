@@ -36,7 +36,7 @@ export function Contact() {
 
   return (
     <section id="contact" className="section-pad pb-[clamp(72px,10vh,120px)] pt-[clamp(72px,12vh,140px)]">
-      <SectionHead no={t.no} slug={t.slug} title={t.title} note={t.note} />
+      <SectionHead title={t.title} />
       <div className="grid gap-[clamp(28px,6vw,96px)] pt-[clamp(32px,6vh,56px)] lg:grid-cols-2">
         <Reveal>
           <h3 className="text-[clamp(1.8rem,3.6vw,2.8rem)] font-bold leading-[1.08] tracking-tight">
@@ -67,8 +67,9 @@ export function Contact() {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="overflow-hidden rounded-xl border bg-panel hairline-strong">
-            <div className="mono flex items-baseline justify-between gap-3 border-b px-5 py-3.5 text-[0.6875rem] text-faint hairline sm:px-6">
+          {/* open form — terminal prompt header, underline fields, zero box chrome */}
+          <div>
+            <div className="mono flex items-baseline justify-between gap-3 border-b pb-3.5 text-[0.6875rem] text-faint hairline-strong">
               <span>{t.formTitle}</span>
               <span className="text-signal">{t.formFlag}</span>
             </div>
@@ -79,14 +80,14 @@ export function Contact() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 role="status"
-                className="mono flex flex-col gap-2 p-6 text-[0.875rem] sm:p-8"
+                className="mono flex flex-col gap-2 pt-6 text-[0.875rem]"
               >
                 <span className="text-signal">{t.doneTitle}</span>
                 <span className="text-muted">{t.doneEta}</span>
                 <span className="text-faint">{t.doneBye}</span>
               </motion.div>
             ) : (
-              <form className="flex flex-col p-5 sm:p-6" onSubmit={onSubmit} noValidate>
+              <form className="flex flex-col pt-2" onSubmit={onSubmit} noValidate>
                 <div className="field">
                   <label className="label mb-1.5 block" htmlFor="f-name">{t.name}</label>
                   <input id="f-name" name="name" type="text" autoComplete="name" required maxLength={100} placeholder={t.namePh} />
