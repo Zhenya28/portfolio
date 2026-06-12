@@ -1,9 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowDownIcon } from "./icons";
-import { TerminalLoop } from "./TerminalLoop";
 import { useDict } from "./LocaleProvider";
+
+const HeroScene = dynamic(() => import("./HeroScene"), { ssr: false });
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -15,6 +17,7 @@ export function Hero() {
   return (
     <section id="top" className="section-pad relative flex min-h-svh flex-col justify-center overflow-hidden pb-12 pt-28">
       <div className="grid-bg" aria-hidden />
+      <HeroScene />
 
       <div className="relative grid items-center gap-x-[clamp(32px,5vw,80px)] gap-y-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div>
@@ -71,12 +74,8 @@ export function Hero() {
           </motion.div>
         </div>
 
-        <div className="relative">
-          <div
-            aria-hidden
-            className="absolute -inset-12 -z-10 bg-[radial-gradient(closest-side,rgba(159,239,0,0.13),rgba(141,123,255,0.09),transparent)] blur-2xl"
-          />
-          <TerminalLoop />
+        <div aria-hidden className="relative hidden lg:block">
+          <div className="absolute left-1/2 top-1/2 size-[34rem] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(closest-side,rgba(159,239,0,0.1),rgba(141,123,255,0.07),transparent)] blur-2xl" />
         </div>
       </div>
     </section>
